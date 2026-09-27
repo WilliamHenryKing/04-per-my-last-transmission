@@ -1,0 +1,87 @@
+import { fuelUsed } from "../game/rules";
+import type { Controller } from "./controller";
+
+export function Controls({ game }: { game: Controller }) {
+  const s = game.session;
+  const aiming = s.phase === "aim";
+  const flying = s.phase === "flight";
+  const brakeLeft = flying && !s.flight?.braked;
+  const fuel = fuelUsed(s.aim.power, !!s.flight?.braked);
+  return (
+    <section
+      className="plate pointer-events-auto grid w-full max-w-[760px] grid-cols-2 items-end gap-x-4 gap-y-2 px-3 py-3 sm:grid-cols-[1fr_1fr_auto] sm:px-4"
+      aria-label="Launch controls"
+    >
+      <label className="flex flex-col">
+        <span className="label flex justify-between">
+          Aim <output className="font-mono tabular-nums">{s.aim.angle.toFixed(0)}°</output>
+        </span>
+        <input
+          className="slider"
+          type="range"
+          min={0}
+          max={359}
+          step={1}
+          value={Math.round(s.aim.angle) % 360}
+          disabled={!aiming}
+          onChange={(e) => game.setAim({ angle: Number(e.currentTarget.value) })}
+          aria-label="Launch angle in degrees"
+        />
+      </label>
+      <label className="flex flex-col">
+        <span className="label flex justify-between">
+          Power <output className="font-mono tabular-nums">{s.aim.power}%</output>
+        </span>
+        <input
+          className="slider"
+          type="range"
+          min={0}
+          max={100}
+          step={1}
+          value={s.aim.power}
+          disabled={!aiming}
+          onChange={(e) => game.setAim({ power: Number(e.currentTarget.value) })}
+          aria-label="Launch power in percent"
+        />
+      </label>
+      <div className="col-span-2 flex items-center justify-between gap-2 sm:col-span-1 sm:justify-end">
+        <p className="label mr-1 text-[10px] opacity-70 sm:hidden">Fuel {fuel}</p>
+        <button
+          type="button"
+          className="btn"
+          onClick={() => game.retry()}
+          disabled={aiming && !s.last}
+          aria-label="Retry mission (R)"
+        >
+          Retry<span className="kbd">R</span>
+        </button>
+        {flying ? (
+          <button
+            type="button"
+            className="btn btn-brass min-w-[132px]"
+            onClick={() => game.brake()}
+            disabled={!brakeLeft}
+            aria-label={brakeLeft ? "Brake, one use (B)" : "Brake already used"}
+          >
+            {brakeLeft ? "Brake ×1" : "Braked"}
+            <span className="kbd">B</span>
+          </button>
+        ) : (
+          <button
+            type="button"
+            className="btn btn-post min-w-[132px]"
+            onClick={() => game.launch()}
+            disabled={!aiming}
+            aria-label="Launch parcel (Space)"
+          >
+            Launch<span className="kbd">Space</span>
+          </button>
+        )}
+      </div>
+      <p className="label col-span-2 hidden text-[10px] opacity-70 sm:col-span-3 sm:block">
+        Fuel this attempt: {fuel} · Drag on the chart to aim · Arrows fine-tune · Shift for bigger
+        steps
+      </p>
+    </section>
+  );
+}

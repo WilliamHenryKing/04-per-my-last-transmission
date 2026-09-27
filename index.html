@@ -5,18 +5,33 @@
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
     <title>PER MY LAST TRANSMISSION</title>
     <meta name="description" content="Humorous orbital parcel-delivery puzzles" />
+    <meta name="theme-color" content="#121629" />
     <style>
-      /* Arrival veil: shown until worldReady() in src/loader.ts lifts it. Restyle to the art direction. */
-      #arrival { position: fixed; inset: 0; z-index: 100; display: grid; place-items: center; align-content: center; gap: 18px; background: #0d0f14; color: #f2efe6; font: 600 13px/1.2 system-ui, sans-serif; letter-spacing: 0.2em; text-transform: uppercase; transition: opacity 0.6s ease, visibility 0.6s; }
+      /* Arrival veil: a postage stamp on the night sky, lifted by worldReady() in src/loader.ts. */
+      #arrival { position: fixed; inset: 0; z-index: 100; display: grid; place-items: center; background: #121629; color: #1b1f2e; font: 800 12px/1.25 system-ui, -apple-system, "Segoe UI", sans-serif; letter-spacing: 0.18em; text-transform: uppercase; transition: opacity 0.6s ease, visibility 0.6s; }
       #arrival.is-done { opacity: 0; visibility: hidden; }
-      #arrival .bar { width: 140px; height: 2px; background: #ffffff22; overflow: hidden; }
-      #arrival .bar i { display: block; height: 100%; width: 40%; background: currentColor; animation: arrival-slide 1.2s ease-in-out infinite; }
-      @keyframes arrival-slide { from { transform: translateX(-100%); } to { transform: translateX(250%); } }
-      @media (prefers-reduced-motion: reduce) { #arrival .bar i { animation: none; width: 100%; } }
+      #arrival .stamp { position: relative; width: min(240px, 70vw); padding: 10px; background: radial-gradient(circle at 7px 7px, #121629 4px, transparent 4.5px) -7px -7px / 14px 14px, #fbf5e8; transform: rotate(-3deg); }
+      #arrival .face { border: 2px solid #1b1f2e; padding: 18px 14px 14px; display: grid; gap: 10px; text-align: center; background: #f3ead7; }
+      #arrival .face b { display: block; font-size: 17px; letter-spacing: 0.08em; line-height: 1.1; }
+      #arrival .face small { color: #d8432e; font-size: 10px; }
+      #arrival .bar { height: 8px; overflow: hidden; border: 2px solid #1b1f2e; background: repeating-linear-gradient(-45deg, #d8432e 0 8px, #fbf5e8 8px 16px, #2f6fb0 16px 24px, #fbf5e8 24px 32px); background-size: 45px 8px; animation: arrival-airmail 0.9s linear infinite; }
+      #arrival .postmark { position: absolute; right: -26px; bottom: -22px; width: 74px; height: 74px; border: 3px solid #d8432e; border-radius: 50%; display: grid; place-items: center; color: #d8432e; font-size: 9px; letter-spacing: 0.1em; transform: rotate(14deg); background: #fbf5e8cc; }
+      @keyframes arrival-airmail { to { background-position: 45px 0; } }
+      @media (prefers-reduced-motion: reduce) { #arrival .bar { animation: none; } #arrival { transition: none; } }
     </style>
   </head>
   <body>
-    <div id="arrival" role="status" aria-live="polite"><span>PER MY LAST TRANSMISSION</span><div class="bar"><i></i></div></div>
+    <div id="arrival" role="status" aria-live="polite">
+      <div class="stamp">
+        <div class="face">
+          <small>Interplanetary parcel service</small>
+          <b>Per my last transmission</b>
+          <div class="bar" aria-hidden="true"></div>
+          <small>Sorting your parcel</small>
+        </div>
+        <div class="postmark" aria-hidden="true">1st<br />class-ish</div>
+      </div>
+    </div>
     <div id="root"></div>
     <script type="module" src="/src/main.tsx"></script>
   </body>

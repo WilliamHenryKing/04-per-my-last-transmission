@@ -1,0 +1,201 @@
+@import "tailwindcss";
+
+@theme {
+  --color-ink: #1b1f2e;
+  --color-night: #121629;
+  --color-cream: #f3ead7;
+  --color-paper: #fbf5e8;
+  --color-post: #d8432e;
+  --color-brass: #e2b04a;
+  --color-enamel: #2f9c95;
+  --font-sans: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  --font-mono: ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace;
+}
+
+html,
+body,
+#root {
+  height: 100%;
+  margin: 0;
+  background: var(--color-night);
+  color: var(--color-cream);
+  font-family: var(--font-sans);
+  overflow: hidden;
+  overscroll-behavior: none;
+}
+
+#root {
+  position: relative;
+  z-index: 1;
+  pointer-events: none;
+}
+
+canvas.stage {
+  position: fixed;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  display: block;
+  touch-action: none;
+  cursor: crosshair;
+}
+
+:focus-visible {
+  outline: 3px solid var(--color-brass);
+  outline-offset: 2px;
+}
+
+/* Enamel plate: cream panel with a hard ink shadow, like a postal sign. */
+.plate {
+  background: var(--color-paper);
+  color: var(--color-ink);
+  border: 2px solid var(--color-ink);
+  border-radius: 10px;
+  box-shadow: 4px 4px 0 var(--color-ink);
+}
+
+.label {
+  font: 700 11px / 1.2 var(--font-sans);
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+.btn {
+  font: 800 14px / 1 var(--font-sans);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  border: 2px solid var(--color-ink);
+  border-radius: 8px;
+  padding: 12px 16px;
+  min-height: 44px;
+  background: var(--color-cream);
+  color: var(--color-ink);
+  box-shadow: 3px 3px 0 var(--color-ink);
+  cursor: pointer;
+  transition:
+    transform 0.08s ease,
+    box-shadow 0.08s ease;
+}
+
+.btn:active:not(:disabled) {
+  transform: translate(2px, 2px);
+  box-shadow: 1px 1px 0 var(--color-ink);
+}
+
+.btn:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+.btn-post {
+  background: var(--color-post);
+  color: var(--color-paper);
+}
+
+.btn-brass {
+  background: var(--color-brass);
+}
+
+.kbd {
+  display: inline-block;
+  font: 700 10px / 1 var(--font-mono);
+  padding: 3px 5px;
+  border: 1.5px solid currentColor;
+  border-radius: 4px;
+  margin-left: 6px;
+  opacity: 0.8;
+}
+
+/* Range inputs styled as brass sliders on an ink track. */
+.slider {
+  appearance: none;
+  width: 100%;
+  height: 28px;
+  background: transparent;
+  cursor: pointer;
+}
+
+.slider::-webkit-slider-runnable-track {
+  height: 6px;
+  background: var(--color-ink);
+  border-radius: 3px;
+}
+
+.slider::-moz-range-track {
+  height: 6px;
+  background: var(--color-ink);
+  border-radius: 3px;
+}
+
+.slider::-webkit-slider-thumb {
+  appearance: none;
+  width: 22px;
+  height: 22px;
+  margin-top: -8px;
+  border-radius: 50%;
+  background: var(--color-brass);
+  border: 2px solid var(--color-ink);
+}
+
+.slider::-moz-range-thumb {
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: var(--color-brass);
+  border: 2px solid var(--color-ink);
+}
+
+/* Rubber stamp: rotated, inked border, slightly uneven. */
+.stamp {
+  display: inline-block;
+  font: 900 13px / 1.1 var(--font-sans);
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  border: 3px double currentColor;
+  border-radius: 6px;
+  padding: 6px 10px;
+  transform: rotate(-4deg);
+}
+
+.stamp-big {
+  font-size: clamp(18px, 4.5vw, 28px);
+  padding: 10px 16px;
+  border-width: 5px;
+  transform: rotate(-6deg);
+}
+
+.perforated {
+  background-image: radial-gradient(circle at 6px 6px, var(--color-night) 3.5px, transparent 4px);
+  background-size: 12px 12px;
+  background-position: -6px -6px;
+  padding: 6px;
+}
+
+.toast {
+  animation: toast-in 0.25s ease-out;
+}
+
+@keyframes toast-in {
+  from {
+    opacity: 0;
+    transform: translateY(-8px);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .toast {
+    animation: none;
+  }
+  .btn {
+    transition: none;
+  }
+}
+
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+}
