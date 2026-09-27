@@ -128,10 +128,10 @@ function mailSack(seed: number) {
 
 export const project = { id: "04-per-my-last-transmission", name: "PER MY LAST TRANSMISSION", background: 0x22303d };
 export const families: Recipes["families"] = [
-  { id: "planet", count: 48, voxel: 0.012, keep: 0.25, hero: true, wear: 0.2, dirt: 0.25, build: planet },
-  { id: "parcel", count: 48, voxel: 0.004, keep: 0.25, wear: 0.5, dirt: 0.3, build: parcel },
+  { id: "planet", count: 96, voxel: 0.012, keep: 0.25, hero: true, wear: 0.2, dirt: 0.25, build: planet },
+  { id: "parcel", count: 96, voxel: 0.004, keep: 0.25, wear: 0.5, dirt: 0.3, build: parcel },
   { id: "receiver-dock", count: 20, voxel: 0.008, keep: 0.3, hero: true, build: dock },
-  { id: "satellite", count: 24, voxel: 0.005, keep: 0.3, build: satellite },
+  { id: "satellite", count: 48, voxel: 0.005, keep: 0.3, build: satellite },
   { id: "mail-sack", count: 16, voxel: 0.006, keep: 0.3, build: mailSack },
 ];
 export const textures: Recipes["textures"] = [
