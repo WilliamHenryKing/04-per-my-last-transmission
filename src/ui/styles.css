@@ -33,6 +33,19 @@ body {
   pointer-events: none;
 }
 
+/* Soft vignette over the chart: pulls the eye to the middle and deepens the edges. */
+#root::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  background: radial-gradient(
+    ellipse 75% 70% at 50% 45%,
+    transparent 55%,
+    rgb(8 10 20 / 0.55) 100%
+  );
+}
+
 canvas.stage {
   position: fixed;
   inset: 0;

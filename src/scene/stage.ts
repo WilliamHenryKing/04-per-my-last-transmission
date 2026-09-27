@@ -1,5 +1,6 @@
 import * as THREE from "three";
 import { PALETTE } from "./palette";
+import { makeGrainMap, makeStarChartMap } from "./tableArt";
 
 // Renderer, camera, lights and the enamel table the miniature sits on.
 // Sim coordinates (x, y) map to world (x, 0, -y) so "up" in the plane is away from camera.
@@ -53,6 +54,10 @@ function makeTable(): THREE.Group {
     new THREE.BoxGeometry(24, 0.6, 16),
     new THREE.MeshPhysicalMaterial({
       color: PALETTE.table,
+      map: makeGrainMap(),
+      emissive: 0xffffff,
+      emissiveMap: makeStarChartMap(),
+      emissiveIntensity: 0.9,
       roughness: 0.55,
       clearcoat: 0.5,
       clearcoatRoughness: 0.4,
@@ -65,7 +70,7 @@ function makeTable(): THREE.Group {
   grid.position.y = -1.595;
   grid.scale.z = 16 / 24;
   (grid.material as THREE.Material).transparent = true;
-  (grid.material as THREE.Material).opacity = 0.55;
+  (grid.material as THREE.Material).opacity = 0.4;
   group.add(grid);
   const trim = new THREE.Mesh(
     new THREE.BoxGeometry(24.4, 0.2, 16.4),
