@@ -53,10 +53,10 @@ export function ResultCard({ game, reducedMotion }: { game: Controller; reducedM
   if (!o) return null;
   const last = s.index === MISSIONS.length - 1;
   return (
-    <div className="pointer-events-none fixed inset-x-0 top-[22%] flex justify-center px-3 sm:top-[26%]">
+    <div className="flex w-full justify-center">
       <div
         ref={root}
-        className="plate pointer-events-auto w-full max-w-[420px] px-4 py-4 text-center"
+        className="plate pointer-events-auto w-full max-w-[480px] px-4 py-3 text-center"
         role="dialog"
         aria-modal="false"
         aria-labelledby="result-title"

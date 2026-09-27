@@ -78,12 +78,11 @@ export function App({ game, reducedMotion }: AppProps) {
         )}
       </div>
 
-      {s.phase === "result" && game.view === "play" && (
-        <ResultCard game={game} reducedMotion={reducedMotion} />
-      )}
-
       <footer className="flex flex-col items-center gap-3">
-        {game.hintOpen && <Hint onDismiss={() => game.dismissHint()} />}
+        {s.phase === "result" && game.view === "play" && (
+          <ResultCard game={game} reducedMotion={reducedMotion} />
+        )}
+        {game.hintOpen && s.phase !== "result" && <Hint onDismiss={() => game.dismissHint()} />}
         <Controls game={game} />
       </footer>
 
