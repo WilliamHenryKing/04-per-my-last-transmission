@@ -38,7 +38,7 @@
     .twinkle { animation: twinkle 6s ease-in-out infinite; }
     @keyframes twinkle { 50% { opacity: .25; } }
     @media (prefers-reduced-motion: reduce) {
-      * { animation: none !important; }
+      .ring, .orbit, .parcel, .kick, .puff, .zone, .stamp, .twinkle { animation: none; }
       .parcel { opacity: 0; }
     }
   </style>
