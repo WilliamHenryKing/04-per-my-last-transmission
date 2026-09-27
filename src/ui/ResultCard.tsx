@@ -31,7 +31,7 @@ export function ResultCard({ game, reducedMotion }: { game: Controller; reducedM
 
   useGSAP(
     () => {
-      if (reducedMotion) return;
+      if (reducedMotion || !o || !root.current) return;
       gsap.from(".stamp-big", {
         scale: 2.4,
         opacity: 0,
@@ -39,6 +39,7 @@ export function ResultCard({ game, reducedMotion }: { game: Controller; reducedM
         duration: 0.35,
         ease: "back.out(2)",
       });
+      if (!root.current.querySelector(".stamp-small")) return;
       gsap.from(".stamp-small", {
         scale: 1.8,
         opacity: 0,

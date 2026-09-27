@@ -119,10 +119,10 @@ export function createStage(canvas: HTMLCanvasElement): Stage {
     const hfov = 2 * Math.atan(Math.tan(vfov / 2) * aspect);
     // Leave room for the HUD bands at the top and bottom of the screen.
     const hudShare = portrait ? 0.62 : 0.74;
-    const dist = Math.max(
-      screenW / 2 / Math.tan(hfov / 2),
-      screenH / 2 / (Math.tan(vfov / 2) * hudShare),
-    );
+    // Perspective enlarges the near edge, so allow a little extra room.
+    const dist =
+      1.14 *
+      Math.max(screenW / 2 / Math.tan(hfov / 2), screenH / 2 / (Math.tan(vfov / 2) * hudShare));
     const cx = (extents.minX + extents.maxX) / 2;
     const cz = -(extents.minY + extents.maxY) / 2;
     const target = new THREE.Vector3(cx, -0.4, cz);
