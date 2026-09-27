@@ -19,6 +19,10 @@ export interface Stage {
   resize(): void;
   render(): void;
   toGround(clientX: number, clientY: number): { x: number; y: number } | null;
+  /** A short camera jolt, e.g. when a stamp slams down. */
+  nudge(strength: number, delay?: number): void;
+  /** Per frame: ease gently toward a point of interest (or back to rest when null). */
+  follow(dt: number, focus: { x: number; y: number } | null): void;
 }
 
 const ELEVATION = THREE.MathUtils.degToRad(58);
@@ -104,6 +108,21 @@ export function createStage(canvas: HTMLCanvasElement): Stage {
   const camera = new THREE.PerspectiveCamera(34, 1, 0.1, 400);
   let extents: Extents = { minX: -8, maxX: 8, minY: -5, maxY: 5 };
 
+  const baseTarget = new THREE.Vector3();
+  const basePosition = new THREE.Vector3();
+  const drift = new THREE.Vector3();
+  const wanted = new THREE.Vector3();
+  const shake = new THREE.Vector3();
+  let shakeLeft = 0;
+  let shakeStrength = 0;
+  let shakeWait = 0;
+
+  // The resting view plus a smoothed drift toward the action and a decaying shake.
+  function aimCamera() {
+    camera.position.copy(basePosition).add(drift).add(shake);
+    camera.lookAt(wanted.copy(baseTarget).add(drift));
+  }
+
   function place() {
     const w = canvas.clientWidth || 1;
     const h = canvas.clientHeight || 1;
@@ -129,11 +148,12 @@ export function createStage(canvas: HTMLCanvasElement): Stage {
     const back = new THREE.Vector3(portrait ? -1 : 0, 0, portrait ? 0 : 1).multiplyScalar(
       Math.cos(ELEVATION) * dist,
     );
-    camera.position
+    baseTarget.copy(target);
+    basePosition
       .copy(target)
       .add(back)
       .add(new THREE.Vector3(0, Math.sin(ELEVATION) * dist, 0));
-    camera.lookAt(target);
+    aimCamera();
     // Nudge the view so the play area sits slightly above the control panel.
     camera.setViewOffset(w, h, 0, portrait ? h * 0.07 : h * 0.03, w, h);
     camera.updateProjectionMatrix();
@@ -161,6 +181,25 @@ export function createStage(canvas: HTMLCanvasElement): Stage {
     resize,
     render() {
       renderer.render(scene, camera);
+    },
+    nudge(strength, delay = 0) {
+      shakeStrength = strength;
+      shakeLeft = 0.28;
+      shakeWait = delay;
+    },
+    follow(dt, focus) {
+      // Drift at most a fifth of the way toward the parcel: a hint of attention, not a chase.
+      const goal = focus
+        ? wanted.set((focus.x - baseTarget.x) * 0.2, 0, (-focus.y - baseTarget.z) * 0.2)
+        : wanted.set(0, 0, 0);
+      drift.lerp(goal, 1 - Math.exp(-dt * 2.5));
+      if (shakeWait > 0) shakeWait -= dt;
+      else if (shakeLeft > 0) {
+        shakeLeft = Math.max(0, shakeLeft - dt);
+        const k = shakeStrength * (shakeLeft / 0.28);
+        shake.set(Math.sin(shakeLeft * 90) * k, -Math.abs(Math.cos(shakeLeft * 70)) * k, 0);
+      } else shake.set(0, 0, 0);
+      aimCamera();
     },
     toGround(clientX, clientY) {
       const r = canvas.getBoundingClientRect();

@@ -134,3 +134,48 @@ export class NearMiss {
 export function toWorld(p: Vec, target: THREE.Vector3, y = 0): THREE.Vector3 {
   return target.set(p.x, y, -p.y);
 }
+
+/** The parcel's wake: only the most recent stretch, fading out behind it. */
+export class FadingLine {
+  readonly line: THREE.Line;
+  private readonly geo = new THREE.BufferGeometry();
+  private readonly pos: Float32Array;
+  private readonly col: Float32Array;
+  private readonly color: THREE.Color;
+
+  constructor(
+    color: number,
+    private readonly max = 140,
+  ) {
+    this.color = new THREE.Color(color);
+    this.pos = new Float32Array(max * 3);
+    this.col = new Float32Array(max * 4);
+    this.geo.setAttribute("position", new THREE.BufferAttribute(this.pos, 3));
+    this.geo.setAttribute("color", new THREE.BufferAttribute(this.col, 4));
+    this.line = new THREE.Line(
+      this.geo,
+      new THREE.LineBasicMaterial({ vertexColors: true, transparent: true, depthWrite: false }),
+    );
+    this.line.frustumCulled = false;
+    this.line.renderOrder = 2;
+  }
+
+  set(points: Vec[]) {
+    const from = Math.max(0, points.length - this.max);
+    const n = points.length - from;
+    for (let i = 0; i < n; i++) {
+      const p = points[from + i] as Vec;
+      this.pos.set([p.x, PLANE_Y, -p.y], i * 3);
+      const a = n > 1 ? i / (n - 1) : 1;
+      this.col.set([this.color.r, this.color.g, this.color.b, a * a * 0.95], i * 4);
+    }
+    this.geo.setDrawRange(0, n);
+    (this.geo.getAttribute("position") as THREE.BufferAttribute).needsUpdate = true;
+    (this.geo.getAttribute("color") as THREE.BufferAttribute).needsUpdate = true;
+    this.line.visible = n > 1;
+  }
+
+  clear() {
+    this.line.visible = false;
+  }
+}

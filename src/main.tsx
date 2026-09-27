@@ -76,6 +76,7 @@ function frame(now: number) {
   }
   if (game.view === "play") session.advance(dt);
   const cues = session.drain();
+  for (const cue of cues) world.react(cue, session, motionQuery.matches);
   if (cues.includes("end")) {
     const v = session.outcome?.verdict;
     if (v === "crashed" || v === "rejected") world.shatter(motionQuery.matches);

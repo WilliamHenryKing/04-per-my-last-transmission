@@ -1,11 +1,12 @@
 import * as THREE from "three";
 import { positionOf } from "../game/physics";
 import type { Prediction } from "../game/predict";
-import type { Session } from "../game/session";
+import type { Cue, Session } from "../game/session";
 import type { Mission, Motion } from "../game/types";
 import { Burst } from "./burst";
+import { Juice } from "./juice";
 import { PALETTE } from "./palette";
-import { DotPath, LinePath, makeCross, NearMiss } from "./paths";
+import { DotPath, FadingLine, LinePath, makeCross, NearMiss } from "./paths";
 import {
   makeDepot,
   makeDock,
@@ -48,6 +49,7 @@ export class World {
   private readonly course = new DotPath(PALETTE.cream, 260, 0.035);
   private readonly brakeGhost = new DotPath(PALETTE.brass, 260, 0.045);
   private readonly trail = new LinePath(PALETTE.cream, 0.9);
+  private readonly wake = new FadingLine(PALETTE.cream);
   private readonly lastPath = new LinePath(PALETTE.red, 0.75, true);
   private readonly guideMiss = new NearMiss(PALETTE.brass, 0.42);
   private readonly lastMiss = new NearMiss(PALETTE.red, 0.42);
@@ -55,6 +57,7 @@ export class World {
   private readonly lastBrake = makeOrbitRing(0.12, PALETTE.brass, 0.9);
   private readonly burst = new Burst();
   private readonly v = new THREE.Vector3();
+  private readonly juice: Juice;
 
   constructor(stage: Stage) {
     this.stage = stage;
@@ -62,7 +65,13 @@ export class World {
     s.add(this.missionGroup, this.depot.group, this.parcels.fragile, this.parcels.robust);
     s.add(this.guide.mesh, this.course.mesh, this.brakeGhost.mesh, this.trail.line);
     s.add(this.lastPath.line, this.guideMiss.group, this.lastMiss.group, this.guideEnd);
-    s.add(this.lastBrake, this.burst.group);
+    s.add(this.lastBrake, this.burst.group, this.wake.line);
+    this.juice = new Juice(s);
+  }
+
+  /** Session cues that deserve a physical flourish in the miniature. */
+  react(cue: Cue, session: Session, reducedMotion: boolean) {
+    this.juice.react(cue, session, this.depot, this.stage, reducedMotion);
   }
 
   setMission(m: Mission) {
@@ -121,7 +130,9 @@ export class World {
       mv.object.position.set(p.x, mv.object.position.y, -p.y);
       if (!f.reducedMotion) mv.object.rotation.y += mv.spin * f.dt;
     }
-    this.depot.barrel.rotation.y = (s.aim.angle * Math.PI) / 180;
+    this.juice.update(f.dt, this.depot, s.aim.angle);
+    const focus = s.phase === "flight" && s.flight && !f.reducedMotion ? s.flight.p : null;
+    this.stage.follow(f.dt, focus);
 
     const aiming = s.phase === "aim";
     const flying = s.phase === "flight";
@@ -136,7 +147,10 @@ export class World {
     this.guideEnd.visible = !!badEnd;
     if (badEnd) this.guideEnd.position.set(badEnd.x, 0.02, -badEnd.y);
 
-    if (flying || s.phase === "result") this.trail.set(s.trail);
+    // In flight a short fading wake; once it lands, the whole route for study.
+    if (flying) this.wake.set(s.trail);
+    else this.wake.clear();
+    if (s.phase === "result") this.trail.set(s.trail);
     else this.trail.clear();
 
     const last = s.phase === "result" ? null : s.last;
