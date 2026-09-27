@@ -1,6 +1,6 @@
 import { MISSIONS } from "../game/missions";
-import { ALL_STAMPS } from "../game/rules";
 import type { Controller } from "./controller";
+import { StampRow } from "./StampRow";
 import { useFocusOnMount } from "./useFocusOnMount";
 
 export function MissionList({ game }: { game: Controller }) {
@@ -38,14 +38,14 @@ export function MissionList({ game }: { game: Controller }) {
                   className="btn flex w-full items-center justify-between gap-2 text-left normal-case"
                   disabled={locked}
                   onClick={() => game.select(i)}
-                  aria-label={`${i + 1}. ${m.title}${locked ? ", locked" : ""}${best ? `, ${best.stamps.length} of 4 stamps` : ""}`}
+                  aria-label={`${i + 1}. ${locked ? "Locked" : m.title}, ${best?.stamps.length ?? 0} of 3 stamps`}
                 >
                   <span className="tracking-normal">
                     <span className="text-post">{i + 1}.</span>{" "}
                     {locked ? "Sealed until further notice" : m.title}
                   </span>
-                  <span className="font-mono text-xs" aria-hidden="true">
-                    {ALL_STAMPS.map((st) => (best?.stamps.includes(st) ? "■" : "□")).join("")}
+                  <span aria-hidden="true">
+                    <StampRow earned={best?.stamps ?? []} />
                   </span>
                 </button>
               </li>
@@ -53,7 +53,7 @@ export function MissionList({ game }: { game: Controller }) {
           })}
         </ol>
         <p className="label mt-3 text-[10px] opacity-70">
-          Stamps: delivered · gentle · frugal · uncorrected
+          Stamps: D delivered · G gentle (contents intact) · F frugal (fuel under par) · uncorrected
         </p>
       </div>
     </div>

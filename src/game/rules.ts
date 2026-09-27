@@ -30,8 +30,9 @@ export function fuelUsed(power: number, braked: boolean): number {
   return Math.round(power) + (braked ? BRAKE_FUEL : 0);
 }
 
-export type Stamp = "DELIVERED" | "GENTLE" | "FRUGAL" | "UNCORRECTED";
-export const ALL_STAMPS: Stamp[] = ["DELIVERED", "GENTLE", "FRUGAL", "UNCORRECTED"];
+/** A mission is rated 1–3 stamps: signed for, contents intact, fuel under par. */
+export type Stamp = "DELIVERED" | "GENTLE" | "FRUGAL";
+export const ALL_STAMPS: Stamp[] = ["DELIVERED", "GENTLE", "FRUGAL"];
 
 export type Verdict = "delivered" | "rejected" | "crashed" | "lost";
 
@@ -70,7 +71,6 @@ export function judge(
     const stamps: Stamp[] = ["DELIVERED"];
     if (rel <= spec.tolerance * 0.5) stamps.push("GENTLE");
     if (fuel <= m.fuelPar) stamps.push("FRUGAL");
-    if (!braked) stamps.push("UNCORRECTED");
     return {
       ...base,
       relSpeed: rel,

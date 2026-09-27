@@ -12,7 +12,7 @@ import {
   step,
 } from "../src/game/physics";
 import { predictBrake, predictLaunch, run } from "../src/game/predict";
-import { EMPTY_PROGRESS, parseProgress, record, totalStamps } from "../src/game/progress";
+import { EMPTY_PROGRESS, parseProgress, rating, record, totalStamps } from "../src/game/progress";
 import { judge, PARCELS } from "../src/game/rules";
 import { Session, wrapAngle } from "../src/game/session";
 import type { Mission } from "../src/game/types";
@@ -165,7 +165,7 @@ describe("arrival rules", () => {
 
   test("stamps reward gentleness, thrift and no correction", () => {
     const all = judge(first, arrived(0.2), first.fuelPar, false, 0);
-    expect(all.stamps).toEqual(["DELIVERED", "GENTLE", "FRUGAL", "UNCORRECTED"]);
+    expect(all.stamps).toEqual(["DELIVERED", "GENTLE", "FRUGAL"]);
     const some = judge(first, arrived(1.2), 100, true, 0);
     expect(some.stamps).toEqual(["DELIVERED"]);
     expect(some.fuel).toBe(125);
@@ -259,8 +259,10 @@ describe("progress", () => {
     expect(p1.unlocked).toBe(1);
     const cheap = judge(first, { kind: "arrived", relSpeed: 1.2 }, 10, false, 0);
     const p2 = record(p1, "mug", 0, 8, cheap);
-    expect(p2.best.mug?.stamps).toEqual(["DELIVERED", "GENTLE", "FRUGAL", "UNCORRECTED"]);
-    expect(totalStamps(p2)).toBe(4);
+    expect(p2.best.mug?.stamps).toEqual(["DELIVERED", "GENTLE", "FRUGAL"]);
+    expect(rating(p2, "mug")).toBe(3);
+    expect(rating(p2, "vase")).toBe(0);
+    expect(totalStamps(p2)).toBe(3);
     expect(p2.finished).toBe(false);
     expect(record(p2, "complaint", 7, 8, cheap).finished).toBe(true);
   });
@@ -275,5 +277,9 @@ describe("progress", () => {
     expect(parseProgress("{nope")).toEqual(EMPTY_PROGRESS);
     expect(parseProgress('{"unlocked":"x"}')).toEqual(EMPTY_PROGRESS);
     expect(parseProgress('{"unlocked":3,"best":{},"finished":true}').unlocked).toBe(3);
+    const old = parseProgress(
+      '{"unlocked":1,"best":{"mug":{"stamps":["DELIVERED","UNCORRECTED"],"fuel":5,"relSpeed":1}}}',
+    );
+    expect(old.best.mug?.stamps).toEqual(["DELIVERED"]);
   });
 });

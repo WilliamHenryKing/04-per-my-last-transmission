@@ -39,6 +39,10 @@ export function record(
   };
 }
 
+export function rating(p: Progress, missionId: string): number {
+  return p.best[missionId]?.stamps.length ?? 0;
+}
+
 export function totalStamps(p: Progress): number {
   return Object.values(p.best).reduce((n, b) => n + b.stamps.length, 0);
 }
@@ -51,7 +55,13 @@ export function parseProgress(raw: string | null): Progress {
     if (typeof v.unlocked !== "number" || typeof v.best !== "object" || v.best === null) {
       return EMPTY_PROGRESS;
     }
-    return { unlocked: Math.max(0, Math.floor(v.unlocked)), best: v.best, finished: !!v.finished };
+    // Keep only stamps this version awards (older saves had a fourth).
+    const best: Record<string, Best> = {};
+    for (const [id, b] of Object.entries(v.best as Record<string, Best>)) {
+      if (!b || !Array.isArray(b.stamps)) continue;
+      best[id] = { ...b, stamps: ALL_STAMPS.filter((s) => b.stamps.includes(s)) };
+    }
+    return { unlocked: Math.max(0, Math.floor(v.unlocked)), best, finished: !!v.finished };
   } catch {
     return EMPTY_PROGRESS;
   }

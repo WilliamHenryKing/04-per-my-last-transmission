@@ -17,9 +17,8 @@ const BIG_STAMP: Record<Verdict, string> = {
 
 const STAMP_NOTES: Record<Stamp, string> = {
   DELIVERED: "Signed for",
-  GENTLE: "Under half the limit",
+  GENTLE: "Contents intact: under half the limit",
   FRUGAL: "Within fuel budget",
-  UNCORRECTED: "No brake used",
 };
 
 export function ResultCard({ game, reducedMotion }: { game: Controller; reducedMotion: boolean }) {

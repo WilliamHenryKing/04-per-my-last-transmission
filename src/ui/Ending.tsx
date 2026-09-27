@@ -3,14 +3,16 @@ import gsap from "gsap";
 import { useRef } from "react";
 import { MISSIONS } from "../game/missions";
 import { totalStamps } from "../game/progress";
+import { ALL_STAMPS } from "../game/rules";
 import type { Controller } from "./controller";
+import { StampRow } from "./StampRow";
 import { useFocusOnMount } from "./useFocusOnMount";
 
 export function Ending({ game, reducedMotion }: { game: Controller; reducedMotion: boolean }) {
   const focusRef = useFocusOnMount<HTMLButtonElement>();
   const root = useRef<HTMLDivElement>(null);
   const stamps = totalStamps(game.progress);
-  const max = MISSIONS.length * 4;
+  const max = MISSIONS.length * ALL_STAMPS.length;
 
   useGSAP(
     () => {
@@ -63,9 +65,18 @@ export function Ending({ game, reducedMotion }: { game: Controller; reducedMotio
             <span className="label block text-[10px] opacity-70">stamps collected</span>
           </p>
         </div>
+        <ol className="mt-3 grid gap-1 border-t border-dashed border-ink/40 pt-2 text-xs">
+          {MISSIONS.map((m, i) => (
+            <li key={m.id} className="flex items-center justify-between gap-2">
+              <span>
+                <span className="text-post">{i + 1}.</span> {m.title}
+              </span>
+              <StampRow earned={game.progress.best[m.id]?.stamps ?? []} />
+            </li>
+          ))}
+        </ol>
         <p className="mt-3 text-xs opacity-80">
-          Every missing stamp is a gentler, cheaper or uncorrected route still waiting in the
-          manifest.
+          Every missing stamp is a gentler or cheaper route still waiting in the manifest.
         </p>
         <div className="mt-4 flex flex-wrap justify-end gap-2">
           <button type="button" className="btn" onClick={() => game.openMissions()}>

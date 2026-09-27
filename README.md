@@ -12,7 +12,7 @@ You work for a spectacularly unhelpful interplanetary parcel service. Launch a p
 - **Brake once:** `B`, `Space` or the **Brake** button during flight. The brass dots preview where braking right now would take you. A braked parcel keeps 40% of its speed.
 - **Arrive:** a parcel is delivered when it enters the dock's brass ring more slowly, relative to the dock, than its limit. Fragile parcels (limit 1.3) break on debris. Robust parcels (limit 2.8) ricochet off it.
 - **Retry:** `R` at any time, including mid-flight. The clock restarts, so the same inputs reproduce the same flight. Your last route stays on the chart as a red dashed line, with a ring marking where the dock was at your closest pass.
-- **Stamps:** Delivered, Gentle (under half the limit), Frugal (within the fuel budget) and Uncorrected (no brake). `L` opens the manifest so you can replay any unlocked mission.
+- **Rating:** each mission earns 1–3 stamps: Delivered, Gentle (contents intact, under half the arrival limit) and Frugal (fuel within the budget). Your best is saved and shown in the manifest, and the ending memo summarises it. `L` opens the manifest so you can replay any unlocked mission.
 - **Sound:** audio starts on your first click, tap or key press. `M` or the **Sound** button mutes, and the setting is remembered. Opening the manifest or hiding the tab pauses the audio.
 
 ## Development
