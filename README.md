@@ -21,6 +21,7 @@ You work for a spectacularly unhelpful interplanetary parcel service. Launch a p
 bun install --frozen-lockfile
 bun run dev        # http://127.0.0.1:4514/
 bun run check      # tsc, Biome, bun test, production build into dist/
+bun run test:e2e   # Playwright: builds, serves on 4614, delivers mission 1 via the real UI
 bun scripts/solve.ts [missionId]   # authoring aid: grid-search a mission for routes
 ```
 
@@ -30,7 +31,7 @@ bun scripts/solve.ts [missionId]   # authoring aid: grid-search a mission for ro
 - `src/ui/`: React HUD, panels and the controller that holds UI state
 - `src/main.tsx`: wiring and the frame loop
 
-Every mission has a reference route found by `scripts/solve.ts`, and a test confirms that it delivers.
+Every mission has a reference route found by `scripts/solve.ts`, and a test confirms that it delivers. The end-to-end test (`e2e/mission-one.e2e.ts`) runs headless with SwiftShader. It pauses the page clock and reads a read-only probe exposed only with `?e2e`, so its key presses land within the route's timing tolerance, then checks the delivered result card.
 
 ## Credits
 
