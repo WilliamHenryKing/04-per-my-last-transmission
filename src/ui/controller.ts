@@ -3,6 +3,25 @@ import { EMPTY_PROGRESS, type Progress, parseProgress, record } from "../game/pr
 import { type Cue, Session } from "../game/session";
 import type { Aim } from "../game/types";
 
+/** What the controller needs from the sound system (kept abstract for the UI layer). */
+export interface Sound {
+  muted: boolean;
+  play(
+    id:
+      | "ui-click"
+      | "ui-tick"
+      | "ui-open"
+      | "ui-close"
+      | "ui-toggle"
+      | "ui-retry"
+      | "ui-next"
+      | "ending",
+  ): void;
+  setMuted(muted: boolean): void;
+}
+
+const SILENT: Sound = { muted: true, play() {}, setMuted() {} };
+
 // UI-side glue: player actions, saved progress, toasts and which panel is open.
 // React subscribes to `version`; the render loop calls frame() once per animation frame.
 
@@ -45,7 +64,10 @@ export class Controller {
   private seenClock = -1;
   private toastTimer = 0;
 
-  constructor() {
+  private readonly sound: Sound;
+
+  constructor(sound: Sound = SILENT) {
+    this.sound = sound;
     this.progress = parseProgress(load(PROGRESS_KEY)) ?? EMPTY_PROGRESS;
     this.session = new Session(Math.min(this.progress.unlocked, MISSIONS.length - 1));
     this.hintOpen = load(HINT_KEY) !== "seen";
@@ -104,17 +126,20 @@ export class Controller {
   dismissHint() {
     if (!this.hintOpen) return;
     this.hintOpen = false;
+    this.sound.play("ui-click");
     save(HINT_KEY, "seen");
     this.bump();
   }
 
   setAim(aim: Partial<Aim>) {
+    const before = this.session.version;
     this.session.setAim(aim);
+    if (this.session.version !== before) this.sound.play("ui-tick");
   }
 
   nudgeAim(dAngle: number, dPower: number) {
     const a = this.session.aim;
-    this.session.setAim({ angle: a.angle + dAngle, power: a.power + dPower });
+    this.setAim({ angle: a.angle + dAngle, power: a.power + dPower });
   }
 
   launch() {
@@ -134,6 +159,8 @@ export class Controller {
 
   retry() {
     if (this.view !== "play") return;
+    if (this.session.phase === "aim" && !this.session.last) return;
+    this.sound.play("ui-retry");
     this.session.reset();
   }
 
@@ -142,26 +169,43 @@ export class Controller {
     if (s.outcome?.verdict !== "delivered") return;
     if (s.index === MISSIONS.length - 1) {
       this.view = "ending";
+      this.sound.play("ending");
       this.bump();
       return;
     }
+    this.sound.play("ui-next");
     s.select(s.index + 1);
   }
 
   select(index: number) {
     if (index > this.progress.unlocked) return;
+    this.sound.play("ui-next");
     this.session.select(index);
     this.view = "play";
     this.bump();
   }
 
   openMissions() {
+    if (this.view === "missions") return;
+    this.sound.play("ui-open");
     this.view = "missions";
     this.bump();
   }
 
   closePanel() {
+    if (this.view === "play") return;
+    this.sound.play("ui-close");
     this.view = "play";
+    this.bump();
+  }
+
+  get muted(): boolean {
+    return this.sound.muted;
+  }
+
+  toggleMute() {
+    this.sound.setMuted(!this.sound.muted);
+    this.sound.play("ui-toggle");
     this.bump();
   }
 }

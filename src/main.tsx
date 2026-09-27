@@ -1,4 +1,6 @@
 import { createRoot } from "react-dom/client";
+import { AudioEngine } from "./audio/engine";
+import { hitsForCue } from "./audio/sounds";
 import { predictBrake, predictFrom, predictLaunch } from "./game/predict";
 import { worldReady } from "./loader";
 import { createStage } from "./scene/stage";
@@ -10,7 +12,8 @@ import "./ui/styles.css";
 // Wiring: one controller (rules + UI state), one three.js world, one frame loop.
 
 const motionQuery = window.matchMedia("(prefers-reduced-motion: reduce)");
-const game = new Controller();
+const audio = new AudioEngine();
+const game = new Controller(audio);
 const session = game.session;
 
 const canvas = document.createElement("canvas");
@@ -53,6 +56,11 @@ canvas.addEventListener("pointerup", (e) => {
   if (canvas.hasPointerCapture(e.pointerId)) canvas.releasePointerCapture(e.pointerId);
 });
 
+// Browsers only allow sound after a gesture: the first press anywhere wakes the audio.
+for (const type of ["pointerdown", "keydown"] as const) {
+  window.addEventListener(type, () => audio.unlock(), { capture: true });
+}
+
 window.addEventListener("resize", () => stage.resize());
 stage.resize();
 
@@ -73,6 +81,16 @@ function frame(now: number) {
     if (v === "crashed" || v === "rejected") world.shatter(motionQuery.matches);
   }
   game.frame(dt, cues);
+  for (const cue of cues) {
+    for (const hit of hitsForCue(cue, session.outcome?.verdict ?? null)) {
+      audio.play(hit.id, hit.delay, hit.rate);
+    }
+  }
+  // Panels pause the game, so the beds and hum pause with it.
+  audio.setMood(
+    game.view === "missions" ? "paused" : game.view === "ending" ? "result" : session.phase,
+  );
+  if (session.flight) audio.setSpeed(Math.hypot(session.flight.v.x, session.flight.v.y));
 
   const m = session.mission;
   const f = session.flight;

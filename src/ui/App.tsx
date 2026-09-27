@@ -23,8 +23,13 @@ export function App({ game, reducedMotion }: AppProps) {
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
       if (e.metaKey || e.ctrlKey || e.altKey) return;
+      if (e.key.toLowerCase() === "m" && !isTyping(e.target)) {
+        game.toggleMute();
+        e.preventDefault();
+        return;
+      }
       if (game.view !== "play") {
-        if (e.key === "Escape") game.closePanel();
+        if (e.key === "Escape" || e.key.toLowerCase() === "l") game.closePanel();
         return;
       }
       const onButton = e.target instanceof HTMLButtonElement;
@@ -43,7 +48,7 @@ export function App({ game, reducedMotion }: AppProps) {
       } else if (key === "b") game.brake();
       else if (key === "r") game.retry();
       else if (key === "n") game.next();
-      else if (key === "m") game.openMissions();
+      else if (key === "l") game.openMissions();
       else return;
       e.preventDefault();
     };
@@ -64,9 +69,21 @@ export function App({ game, reducedMotion }: AppProps) {
             <span className="label block text-[10px] opacity-70">Clock</span>T+
             {s.time.toFixed(1).padStart(4, "0")}s
           </div>
-          <button type="button" className="btn text-xs" onClick={() => game.openMissions()}>
-            Missions<span className="kbd">M</span>
-          </button>
+          <div className="flex gap-2">
+            <button
+              type="button"
+              className="btn px-3 text-xs"
+              onClick={() => game.toggleMute()}
+              aria-pressed={game.muted}
+              aria-label={game.muted ? "Sound off. Turn sound on (M)" : "Sound on. Mute (M)"}
+            >
+              {game.muted ? "Sound off" : "Sound on"}
+              <span className="kbd">M</span>
+            </button>
+            <button type="button" className="btn text-xs" onClick={() => game.openMissions()}>
+              Missions<span className="kbd">L</span>
+            </button>
+          </div>
         </div>
       </header>
 

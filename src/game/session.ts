@@ -8,7 +8,10 @@ import type { Aim, Closest, Flight, Mission, Vec } from "./types";
 // No DOM, no rendering; the UI and scene read it every frame.
 
 export type Phase = "aim" | "flight" | "result";
-export type Cue = "launch" | "brake" | "bounce" | "circled" | "end";
+export type Cue = "launch" | "brake" | "bounce" | "circled" | "near" | "end";
+
+/** Passing this close to the dock earns a whoosh, once per flight. */
+export const NEAR_DISTANCE = 1;
 
 export interface Attempt {
   aim: Aim;
@@ -51,6 +54,7 @@ export class Session {
   /** Bumped on every discrete change so the UI can re-render cheaply. */
   version = 0;
   private cues: Cue[] = [];
+  private near = false;
   private acc = 0;
 
   constructor(index = 0) {
@@ -94,6 +98,7 @@ export class Session {
     if (this.phase !== "aim") return false;
     this.flight = launch(this.mission, this.tick, this.aim);
     this.trail = [{ ...this.flight.p }];
+    this.near = false;
     this.phase = "flight";
     this.attempts++;
     this.cue("launch");
@@ -130,6 +135,10 @@ export class Session {
     if (f.step % SAMPLE_EVERY === 0) this.trail.push({ ...f.p });
     if (e?.kind === "bounce") this.cue("bounce");
     if (e?.kind === "circled") this.cue("circled");
+    if (!this.near && f.closest.distance < NEAR_DISTANCE) {
+      this.near = true;
+      this.cue("near");
+    }
     if (!isTerminal(e)) return false;
     this.trail.push({ ...f.p });
     this.outcome = judge(this.mission, e, this.aim.power, f.braked, f.closest.distance);
