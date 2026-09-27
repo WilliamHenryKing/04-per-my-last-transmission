@@ -1,0 +1,156 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1280 360" width="1280" height="360" role="img" aria-labelledby="t d">
+  <title id="t">PER MY LAST TRANSMISSION</title>
+  <desc id="d">A postage-stamp title card beside a miniature orbit: a parcel arcs along a dotted route from a red enamel cannon into a café dock by a small moon, and a DELIVERED stamp slams down.</desc>
+  <style>
+    text { font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; }
+    .mono { font-family: ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace; }
+    .ring { fill: none; stroke: #2f9c95; stroke-width: 1.5; stroke-dasharray: 6 14; opacity: .45; animation: turn 6s linear infinite; }
+    .ring.slow { animation-duration: 12s; opacity: .3; }
+    .ring.rev { animation-direction: reverse; }
+    .orbit { fill: none; stroke: #e2b04a; stroke-width: 2; stroke-dasharray: 3 9; opacity: .8; animation: turn 6s linear infinite; }
+    @keyframes turn { to { stroke-dashoffset: -240; } }
+    .route { fill: none; stroke: #f3ead7; stroke-width: 6; stroke-linecap: round; stroke-dasharray: 0 17; opacity: .9; }
+    .parcel {
+      offset-path: path("M 676 282 C 760 222 850 226 918 236");
+      offset-rotate: auto;
+      opacity: 0;
+      animation: fly 6s cubic-bezier(.35,.1,.45,1) infinite;
+    }
+    @keyframes fly {
+      0%, 8% { offset-distance: 0%; opacity: 0; }
+      10% { opacity: 1; }
+      54% { offset-distance: 100%; opacity: 1; }
+      58%, 100% { offset-distance: 100%; opacity: 0; }
+    }
+    .kick { transform-box: fill-box; transform-origin: 0% 50%; animation: kick 6s ease-out infinite; }
+    @keyframes kick { 0%, 8% { transform: translateX(0); } 10% { transform: translateX(-9px); } 16%, 100% { transform: translateX(0); } }
+    .puff { transform-box: fill-box; transform-origin: center; opacity: 0; animation: puff 6s ease-out infinite; }
+    @keyframes puff { 0%, 8% { opacity: 0; transform: scale(.3); } 10% { opacity: .9; } 18%, 100% { opacity: 0; transform: scale(1.6); } }
+    .zone { transform-box: fill-box; transform-origin: center; animation: zone 6s ease-out infinite; }
+    @keyframes zone { 0%, 54% { transform: scale(1); opacity: .9; } 60% { transform: scale(1.7); opacity: 0; } 61%, 100% { transform: scale(1); opacity: .9; } }
+    .stamp { transform-box: fill-box; transform-origin: center; opacity: 1; transform: rotate(-9deg); animation: slam 6s cubic-bezier(.2,.9,.3,1.3) infinite; }
+    @keyframes slam {
+      0%, 56% { opacity: 0; transform: rotate(-20deg) scale(2.4); }
+      62% { opacity: 1; transform: rotate(-9deg) scale(.96); }
+      65%, 92% { opacity: 1; transform: rotate(-9deg) scale(1); }
+      100% { opacity: 0; transform: rotate(-9deg) scale(1); }
+    }
+    .twinkle { animation: twinkle 6s ease-in-out infinite; }
+    @keyframes twinkle { 50% { opacity: .25; } }
+    @media (prefers-reduced-motion: reduce) {
+      * { animation: none !important; }
+      .parcel { opacity: 0; }
+    }
+  </style>
+  <defs>
+    <radialGradient id="sky" cx="68%" cy="45%" r="75%">
+      <stop offset="0" stop-color="#1d2440"/>
+      <stop offset="1" stop-color="#0d1020"/>
+    </radialGradient>
+    <radialGradient id="moon" cx="38%" cy="32%" r="75%">
+      <stop offset="0" stop-color="#fbf5e8"/>
+      <stop offset=".65" stop-color="#e3dac6"/>
+      <stop offset="1" stop-color="#a99f8b"/>
+    </radialGradient>
+    <radialGradient id="dome" cx="35%" cy="30%" r="70%">
+      <stop offset="0" stop-color="#ffffff"/>
+      <stop offset="1" stop-color="#bdb6a8"/>
+    </radialGradient>
+    <pattern id="perf" width="16" height="16" patternUnits="userSpaceOnUse">
+      <circle cx="8" cy="8" r="5.2" fill="#0d1020"/>
+    </pattern>
+  </defs>
+
+  <rect width="1280" height="360" fill="url(#sky)"/>
+
+  <!-- star specks -->
+  <g fill="#f3ead7">
+    <circle cx="612" cy="44" r="1.4" opacity=".6"/><circle cx="700" cy="120" r="1" opacity=".4"/>
+    <circle cx="760" cy="34" r="1.2" opacity=".5" class="twinkle"/><circle cx="846" cy="92" r="1" opacity=".35"/>
+    <circle cx="1180" cy="40" r="1.6" opacity=".6" class="twinkle"/><circle cx="1240" cy="150" r="1" opacity=".4"/>
+    <circle cx="1210" cy="322" r="1.2" opacity=".45"/><circle cx="1130" cy="84" r="1" opacity=".3"/>
+    <circle cx="660" cy="330" r="1" opacity=".35"/><circle cx="905" cy="330" r="1.4" opacity=".5" class="twinkle"/>
+    <circle cx="980" cy="28" r="1" opacity=".4"/><circle cx="1262" cy="250" r="1.1" opacity=".4"/>
+  </g>
+
+  <!-- chart rings round the moon, slowly turning -->
+  <ellipse class="ring slow" cx="1030" cy="178" rx="236" ry="118"/>
+  <ellipse class="ring rev" cx="1030" cy="178" rx="176" ry="88"/>
+  <ellipse class="orbit" cx="1030" cy="178" rx="122" ry="60"/>
+
+  <!-- moon -->
+  <ellipse cx="1046" cy="222" rx="66" ry="16" fill="#070914" opacity=".55"/>
+  <circle cx="1030" cy="172" r="58" fill="url(#moon)"/>
+  <g fill="#9d9380" opacity=".55">
+    <ellipse cx="1008" cy="150" rx="12" ry="8"/><ellipse cx="1052" cy="190" rx="15" ry="9"/>
+    <ellipse cx="1046" cy="140" rx="7" ry="5"/><ellipse cx="1004" cy="196" rx="8" ry="5"/>
+  </g>
+
+  <!-- dotted route (the honest guide) -->
+  <path class="route" d="M 676 282 C 760 222 850 226 918 236"/>
+
+  <!-- receiving dock: café hut with capture ring -->
+  <g transform="translate(922 238)">
+    <ellipse class="zone" cx="0" cy="4" rx="26" ry="12" fill="none" stroke="#e2b04a" stroke-width="3"/>
+    <ellipse cx="0" cy="6" rx="18" ry="8" fill="#2f9c95"/>
+    <rect x="-10" y="-14" width="20" height="16" rx="2" fill="#f3ead7" stroke="#1b1f2e" stroke-width="1.5"/>
+    <rect x="-13" y="-19" width="26" height="6" rx="1.5" fill="#d8432e" stroke="#1b1f2e" stroke-width="1.5"/>
+    <g transform="translate(-44 -52)">
+      <rect width="88" height="18" fill="#f3ead7" stroke="#d8432e" stroke-width="2"/>
+      <text x="44" y="13" text-anchor="middle" font-size="10" font-weight="800" letter-spacing="1" fill="#1b1f2e">MOON CAFÉ</text>
+    </g>
+  </g>
+
+  <!-- depot cannon -->
+  <g transform="translate(652 298)">
+    <ellipse cx="6" cy="16" rx="42" ry="14" fill="#070914" opacity=".5"/>
+    <ellipse cx="0" cy="8" rx="38" ry="18" fill="#a8341f"/>
+    <ellipse cx="0" cy="2" rx="38" ry="18" fill="#d8432e"/>
+    <ellipse cx="0" cy="2" rx="30" ry="14" fill="none" stroke="#e2b04a" stroke-width="3"/>
+    <g transform="rotate(-36)">
+      <g class="kick">
+        <rect x="0" y="-6" width="40" height="12" rx="4" fill="#8d97a8" stroke="#1b1f2e" stroke-width="2"/>
+        <rect x="36" y="-8" width="6" height="16" rx="2" fill="#e2b04a"/>
+      </g>
+    </g>
+    <circle cx="0" cy="-2" r="16" fill="url(#dome)"/>
+    <g class="puff" fill="#f3ead7" transform="translate(28 -26)">
+      <circle cx="0" cy="0" r="5"/><circle cx="9" cy="-4" r="4"/><circle cx="4" cy="8" r="4"/><circle cx="-7" cy="-6" r="3"/>
+    </g>
+  </g>
+
+  <!-- the parcel, battered, taped, in flight -->
+  <g class="parcel">
+    <rect x="-13" y="-9" width="26" height="18" rx="2" fill="#b98a5a" stroke="#6d4b2c" stroke-width="1.5"/>
+    <rect x="-3" y="-9" width="6" height="18" fill="#d8432e"/>
+  </g>
+
+  <!-- the stamp -->
+  <g class="stamp">
+    <rect x="1066" y="258" width="190" height="56" rx="6" fill="#fbf5e8" fill-opacity=".08" stroke="#d8432e" stroke-width="4"/>
+    <rect x="1073" y="265" width="176" height="42" rx="4" fill="none" stroke="#d8432e" stroke-width="1.5"/>
+    <text x="1161" y="295" text-anchor="middle" font-size="25" font-weight="900" letter-spacing="3" fill="#d8432e">DELIVERED</text>
+  </g>
+
+  <!-- title stamp, perforated -->
+  <g transform="rotate(-2.5 300 180)">
+    <rect x="44" y="34" width="512" height="292" fill="#fbf5e8"/>
+    <rect x="36" y="26" width="528" height="16" fill="url(#perf)"/>
+    <rect x="36" y="318" width="528" height="16" fill="url(#perf)"/>
+    <rect x="36" y="26" width="16" height="308" fill="url(#perf)"/>
+    <rect x="548" y="26" width="16" height="308" fill="url(#perf)"/>
+    <rect x="68" y="56" width="464" height="248" fill="#f3ead7" stroke="#1b1f2e" stroke-width="3"/>
+    <text x="92" y="98" font-size="13" font-weight="800" letter-spacing="2.5" fill="#d8432e">INTERPLANETARY PARCEL SERVICE</text>
+    <text x="90" y="160" font-size="46" font-weight="900" letter-spacing="1" fill="#1b1f2e">PER MY LAST</text>
+    <text x="90" y="212" font-size="46" font-weight="900" letter-spacing="1" fill="#1b1f2e">TRANSMISSION</text>
+    <rect x="92" y="234" width="400" height="10" fill="#d8432e"/>
+    <rect x="92" y="234" width="400" height="10" fill="none" stroke="#1b1f2e" stroke-width="2"/>
+    <text x="92" y="276" class="mono" font-size="13" font-weight="700" letter-spacing=".3" fill="#1b1f2e" opacity=".8">8 missions · 1 brake · no refunds</text>
+    <g transform="translate(482 272) rotate(14)" opacity=".92">
+      <circle r="34" fill="#f3ead7" stroke="#d8432e" stroke-width="3"/>
+      <circle r="27" fill="none" stroke="#d8432e" stroke-width="1"/>
+      <text y="-2" text-anchor="middle" font-size="11" font-weight="900" letter-spacing="1" fill="#d8432e">1st</text>
+      <text y="12" text-anchor="middle" font-size="9" font-weight="800" letter-spacing="1" fill="#d8432e">CLASS-ISH</text>
+    </g>
+  </g>
+</svg>
