@@ -9,7 +9,7 @@ export function MissionCard({ game }: { game: Controller }) {
   const last = s.phase === "aim" ? s.last : null;
   return (
     <section
-      className="plate pointer-events-auto max-w-[min(440px,62vw)] px-3 py-2 sm:px-4 sm:py-3"
+      className="plate pointer-events-auto w-full px-3 py-2 sm:w-auto sm:max-w-[min(440px,62vw)] sm:px-4 sm:py-3"
       aria-label="Mission"
     >
       <p className="label text-post">

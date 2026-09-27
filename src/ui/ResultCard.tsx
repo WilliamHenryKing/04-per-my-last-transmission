@@ -94,7 +94,7 @@ export function ResultCard({ game, reducedMotion }: { game: Controller; reducedM
         )}
         <div className="mt-4 flex justify-center gap-2">
           <button type="button" className="btn" onClick={() => game.retry()}>
-            Retry<span className="kbd">R</span>
+            Retry<span className="kbd max-sm:hidden">R</span>
           </button>
           {good && (
             <button
@@ -104,7 +104,7 @@ export function ResultCard({ game, reducedMotion }: { game: Controller; reducedM
               ref={focusRef}
             >
               {last ? "File report" : "Next parcel"}
-              <span className="kbd">N</span>
+              <span className="kbd max-sm:hidden">N</span>
             </button>
           )}
         </div>

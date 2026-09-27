@@ -53,7 +53,7 @@ export function Controls({ game }: { game: Controller }) {
           disabled={aiming && !s.last}
           aria-label="Retry mission (R)"
         >
-          Retry<span className="kbd">R</span>
+          Retry<span className="kbd max-sm:hidden">R</span>
         </button>
         {flying ? (
           <button
@@ -64,7 +64,7 @@ export function Controls({ game }: { game: Controller }) {
             aria-label={brakeLeft ? "Brake, one use (B)" : "Brake already used"}
           >
             {brakeLeft ? "Brake ×1" : "Braked"}
-            <span className="kbd">B</span>
+            <span className="kbd max-sm:hidden">B</span>
           </button>
         ) : (
           <button
@@ -74,7 +74,7 @@ export function Controls({ game }: { game: Controller }) {
             disabled={!aiming}
             aria-label="Launch parcel (Space)"
           >
-            Launch<span className="kbd">Space</span>
+            Launch<span className="kbd max-sm:hidden">Space</span>
           </button>
         )}
       </div>

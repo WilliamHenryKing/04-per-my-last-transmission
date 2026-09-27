@@ -61,142 +61,145 @@ canvas.stage {
   outline-offset: 2px;
 }
 
-/* Enamel plate: cream panel with a hard ink shadow, like a postal sign. */
-.plate {
-  background: var(--color-paper);
-  color: var(--color-ink);
-  border: 2px solid var(--color-ink);
-  border-radius: 10px;
-  box-shadow: 4px 4px 0 var(--color-ink);
-}
+/* Component classes live in a layer so Tailwind utilities can still adjust them. */
+@layer components {
+  /* Enamel plate: cream panel with a hard ink shadow, like a postal sign. */
+  .plate {
+    background: var(--color-paper);
+    color: var(--color-ink);
+    border: 2px solid var(--color-ink);
+    border-radius: 10px;
+    box-shadow: 4px 4px 0 var(--color-ink);
+  }
 
-.label {
-  font: 700 11px / 1.2 var(--font-sans);
-  letter-spacing: 0.14em;
-  text-transform: uppercase;
-}
+  .label {
+    font: 700 11px / 1.2 var(--font-sans);
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+  }
 
-.btn {
-  font: 800 14px / 1 var(--font-sans);
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  border: 2px solid var(--color-ink);
-  border-radius: 8px;
-  padding: 12px 16px;
-  min-height: 44px;
-  background: var(--color-cream);
-  color: var(--color-ink);
-  box-shadow: 3px 3px 0 var(--color-ink);
-  cursor: pointer;
-  transition:
-    transform 0.08s ease,
-    box-shadow 0.08s ease;
-}
+  .btn {
+    font: 800 14px / 1 var(--font-sans);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    border: 2px solid var(--color-ink);
+    border-radius: 8px;
+    padding: 12px 16px;
+    min-height: 44px;
+    background: var(--color-cream);
+    color: var(--color-ink);
+    box-shadow: 3px 3px 0 var(--color-ink);
+    cursor: pointer;
+    transition:
+      transform 0.08s ease,
+      box-shadow 0.08s ease;
+  }
 
-.btn:active:not(:disabled) {
-  transform: translate(2px, 2px);
-  box-shadow: 1px 1px 0 var(--color-ink);
-}
+  .btn:active:not(:disabled) {
+    transform: translate(2px, 2px);
+    box-shadow: 1px 1px 0 var(--color-ink);
+  }
 
-.btn:disabled {
-  opacity: 0.45;
-  cursor: not-allowed;
-}
+  .btn:disabled {
+    opacity: 0.45;
+    cursor: not-allowed;
+  }
 
-.btn-post {
-  background: var(--color-post);
-  color: var(--color-paper);
-}
+  .btn-post {
+    background: var(--color-post);
+    color: var(--color-paper);
+  }
 
-.btn-brass {
-  background: var(--color-brass);
-}
+  .btn-brass {
+    background: var(--color-brass);
+  }
 
-.kbd {
-  display: inline-block;
-  font: 700 10px / 1 var(--font-mono);
-  padding: 3px 5px;
-  border: 1.5px solid currentColor;
-  border-radius: 4px;
-  margin-left: 6px;
-  opacity: 0.8;
-}
+  .kbd {
+    display: inline-block;
+    font: 700 10px / 1 var(--font-mono);
+    padding: 3px 5px;
+    border: 1.5px solid currentColor;
+    border-radius: 4px;
+    margin-left: 6px;
+    opacity: 0.8;
+  }
 
-/* Range inputs styled as brass sliders on an ink track. */
-.slider {
-  appearance: none;
-  width: 100%;
-  height: 28px;
-  background: transparent;
-  cursor: pointer;
-}
+  /* Range inputs styled as brass sliders on an ink track. */
+  .slider {
+    appearance: none;
+    width: 100%;
+    height: 28px;
+    background: transparent;
+    cursor: pointer;
+  }
 
-.slider::-webkit-slider-runnable-track {
-  height: 6px;
-  background: var(--color-ink);
-  border-radius: 3px;
-}
+  .slider::-webkit-slider-runnable-track {
+    height: 6px;
+    background: var(--color-ink);
+    border-radius: 3px;
+  }
 
-.slider::-moz-range-track {
-  height: 6px;
-  background: var(--color-ink);
-  border-radius: 3px;
-}
+  .slider::-moz-range-track {
+    height: 6px;
+    background: var(--color-ink);
+    border-radius: 3px;
+  }
 
-.slider::-webkit-slider-thumb {
-  appearance: none;
-  width: 22px;
-  height: 22px;
-  margin-top: -8px;
-  border-radius: 50%;
-  background: var(--color-brass);
-  border: 2px solid var(--color-ink);
-}
+  .slider::-webkit-slider-thumb {
+    appearance: none;
+    width: 22px;
+    height: 22px;
+    margin-top: -8px;
+    border-radius: 50%;
+    background: var(--color-brass);
+    border: 2px solid var(--color-ink);
+  }
 
-.slider::-moz-range-thumb {
-  width: 18px;
-  height: 18px;
-  border-radius: 50%;
-  background: var(--color-brass);
-  border: 2px solid var(--color-ink);
-}
+  .slider::-moz-range-thumb {
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    background: var(--color-brass);
+    border: 2px solid var(--color-ink);
+  }
 
-/* Rubber stamp: rotated, inked border, slightly uneven. */
-.stamp {
-  display: inline-block;
-  font: 900 13px / 1.1 var(--font-sans);
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
-  border: 3px double currentColor;
-  border-radius: 6px;
-  padding: 6px 10px;
-  transform: rotate(-4deg);
-}
+  /* Rubber stamp: rotated, inked border, slightly uneven. */
+  .stamp {
+    display: inline-block;
+    font: 900 13px / 1.1 var(--font-sans);
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    border: 3px double currentColor;
+    border-radius: 6px;
+    padding: 6px 10px;
+    transform: rotate(-4deg);
+  }
 
-.stamp-big {
-  font-size: clamp(16px, 2.6vw, 24px);
-  max-width: 92%;
-  margin: 6px 0 10px;
-  padding: 8px 14px;
-  border-width: 5px;
-  transform: rotate(-4deg);
-}
+  .stamp-big {
+    font-size: clamp(16px, 2.6vw, 24px);
+    max-width: 92%;
+    margin: 6px 0 10px;
+    padding: 8px 14px;
+    border-width: 5px;
+    transform: rotate(-4deg);
+  }
 
-.perforated {
-  background-image: radial-gradient(circle at 6px 6px, var(--color-night) 3.5px, transparent 4px);
-  background-size: 12px 12px;
-  background-position: -6px -6px;
-  padding: 6px;
-}
+  .perforated {
+    background-image: radial-gradient(circle at 6px 6px, var(--color-night) 3.5px, transparent 4px);
+    background-size: 12px 12px;
+    background-position: -6px -6px;
+    padding: 6px;
+  }
 
-.toast {
-  animation: toast-in 0.25s ease-out;
-}
+  .toast {
+    animation: toast-in 0.25s ease-out;
+  }
 
-@keyframes toast-in {
-  from {
-    opacity: 0;
-    transform: translateY(-8px);
+  @keyframes toast-in {
+    from {
+      opacity: 0;
+      transform: translateY(-8px);
+    }
   }
 }
 

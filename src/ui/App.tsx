@@ -58,30 +58,35 @@ export function App({ game, reducedMotion }: AppProps) {
 
   return (
     <div className="pointer-events-none fixed inset-0 flex flex-col justify-between gap-3 p-3 sm:p-5">
-      <header className="flex items-start justify-between gap-3">
+      {/* Phones stack the title card above one compact row; wider screens sit them side by side. */}
+      <header className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between sm:gap-3">
         <MissionCard game={game} />
-        <div className="pointer-events-auto flex flex-col items-end gap-2">
+        <div className="pointer-events-auto flex items-center justify-end gap-2 sm:flex-col sm:items-end">
           <div
-            className="plate px-3 py-2 text-right font-mono text-sm tabular-nums"
+            className="plate mr-auto px-3 py-1.5 text-left font-mono text-sm tabular-nums sm:mr-0 sm:py-2 sm:text-right"
             role="timer"
             aria-label="Mission clock"
           >
-            <span className="label block text-[10px] opacity-70">Clock</span>T+
+            <span className="label mr-2 text-[10px] opacity-70 sm:mr-0 sm:block">Clock</span>T+
             {s.time.toFixed(1).padStart(4, "0")}s
           </div>
           <div className="flex gap-2">
             <button
               type="button"
-              className="btn px-3 text-xs"
+              className="btn min-h-11 px-3 py-2 text-xs sm:py-3"
               onClick={() => game.toggleMute()}
               aria-pressed={game.muted}
               aria-label={game.muted ? "Sound off. Turn sound on (M)" : "Sound on. Mute (M)"}
             >
               {game.muted ? "Sound off" : "Sound on"}
-              <span className="kbd">M</span>
+              <span className="kbd max-sm:hidden">M</span>
             </button>
-            <button type="button" className="btn text-xs" onClick={() => game.openMissions()}>
-              Missions<span className="kbd">L</span>
+            <button
+              type="button"
+              className="btn min-h-11 px-3 py-2 text-xs sm:px-4 sm:py-3"
+              onClick={() => game.openMissions()}
+            >
+              Missions<span className="kbd max-sm:hidden">L</span>
             </button>
           </div>
         </div>
