@@ -185,6 +185,11 @@ describe("missions", () => {
     expect(new Set(MISSIONS.map((m) => m.id)).size).toBe(8);
   });
 
+  test("the ricochet mission's reference route really ricochets", () => {
+    const anvil = MISSIONS.find((m) => m.id === "anvil") as Mission;
+    expect(run(anvil, anvil.reference).flight.bounces).toBeGreaterThan(0);
+  });
+
   for (const m of MISSIONS) {
     test(`${m.id}: the reference route delivers`, () => {
       const r = run(m, m.reference);

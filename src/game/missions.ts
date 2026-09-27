@@ -203,9 +203,9 @@ export const MISSIONS: Mission[] = [
     },
     guideSeconds: 3.5,
     maxFlightSeconds: 8,
-    fuelPar: 60,
+    fuelPar: 45,
     bounds: BOUNDS,
-    reference: { delayTicks: 0, aim: { angle: 0, power: 50 }, brakeStep: null },
+    reference: { delayTicks: 570, aim: { angle: 353, power: 25 }, brakeStep: 378 },
   },
   {
     id: "anvil",
@@ -242,9 +242,9 @@ export const MISSIONS: Mission[] = [
     },
     guideSeconds: 3.5,
     maxFlightSeconds: 8,
-    fuelPar: 70,
+    fuelPar: 30,
     bounds: BOUNDS,
-    reference: { delayTicks: 0, aim: { angle: 0, power: 50 }, brakeStep: null },
+    reference: { delayTicks: 90, aim: { angle: 15, power: 45 }, brakeStep: 318 },
   },
   {
     id: "complaint",
