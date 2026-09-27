@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+  <defs>
+    <mask id="perf">
+      <rect width="64" height="64" fill="#fff"/>
+      <g fill="#000">
+        <circle cx="4" cy="4" r="3"/><circle cx="16" cy="4" r="3"/><circle cx="28" cy="4" r="3"/><circle cx="40" cy="4" r="3"/><circle cx="52" cy="4" r="3"/><circle cx="64" cy="4" r="3"/>
+        <circle cx="4" cy="60" r="3"/><circle cx="16" cy="60" r="3"/><circle cx="28" cy="60" r="3"/><circle cx="40" cy="60" r="3"/><circle cx="52" cy="60" r="3"/><circle cx="64" cy="60" r="3"/>
+        <circle cx="4" cy="16" r="3"/><circle cx="4" cy="28" r="3"/><circle cx="4" cy="40" r="3"/><circle cx="4" cy="52" r="3"/>
+        <circle cx="60" cy="16" r="3"/><circle cx="60" cy="28" r="3"/><circle cx="60" cy="40" r="3"/><circle cx="60" cy="52" r="3"/>
+      </g>
+    </mask>
+  </defs>
+  <rect x="2" y="2" width="60" height="60" fill="#fbf5e8" mask="url(#perf)"/>
+  <rect x="10" y="10" width="44" height="44" fill="#121629" stroke="#1b1f2e" stroke-width="2"/>
+  <ellipse cx="32" cy="32" rx="17" ry="9" fill="none" stroke="#e2b04a" stroke-width="2.5" transform="rotate(-20 32 32)"/>
+  <circle cx="32" cy="32" r="8" fill="#f3ead7"/>
+  <rect x="42" y="18" width="8" height="7" rx="1" fill="#d8432e"/>
+</svg>
