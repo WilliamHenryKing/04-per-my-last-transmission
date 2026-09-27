@@ -134,7 +134,9 @@ export class Controller {
   setAim(aim: Partial<Aim>) {
     const before = this.session.version;
     this.session.setAim(aim);
-    if (this.session.version !== before) this.sound.play("ui-tick");
+    if (this.session.version === before) return;
+    this.sound.play("ui-tick");
+    this.bump();
   }
 
   nudgeAim(dAngle: number, dPower: number) {
@@ -144,11 +146,13 @@ export class Controller {
 
   launch() {
     if (this.view !== "play") return;
-    if (this.session.launch()) this.dismissHint();
+    if (!this.session.launch()) return;
+    this.dismissHint();
+    this.bump();
   }
 
   brake() {
-    this.session.brake();
+    if (this.session.brake()) this.bump();
   }
 
   /** One action for the big button: launch while aiming, brake while flying. */

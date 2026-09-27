@@ -118,7 +118,7 @@ export class Session {
 
   /** Advance real time. The world clock runs while aiming: launch timing matters. */
   advance(seconds: number) {
-    if (this.phase === "result") return;
+    if (this.phase === "result" || !(seconds > 0)) return;
     this.acc = Math.min(this.acc + seconds, MAX_STEPS_PER_ADVANCE * DT);
     while (this.acc >= DT) {
       this.acc -= DT;

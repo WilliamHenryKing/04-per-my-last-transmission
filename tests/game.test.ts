@@ -235,6 +235,14 @@ describe("session", () => {
     expect(s.outcome?.verdict).toBe("delivered");
   });
 
+  test("negative or invalid frame times are ignored", () => {
+    const s = new Session(0);
+    s.advance(-5);
+    s.advance(Number.NaN);
+    s.advance(DT);
+    expect(s.tick).toBe(1);
+  });
+
   test("a long frame never fast-forwards more than a few steps", () => {
     const s = new Session(0);
     s.advance(5);

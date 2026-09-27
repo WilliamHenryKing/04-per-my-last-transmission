@@ -68,7 +68,8 @@ let prev = performance.now();
 let first = true;
 
 function frame(now: number) {
-  const dt = Math.min(0.1, (now - prev) / 1000);
+  // Clamp: a backwards timestamp must never rewind the world, a stall never leaps it.
+  const dt = Math.max(0, Math.min(0.1, (now - prev) / 1000));
   prev = now;
   if (missionShown !== session.mission.id) {
     missionShown = session.mission.id;
@@ -111,6 +112,24 @@ function frame(now: number) {
   requestAnimationFrame(frame);
 }
 requestAnimationFrame(frame);
+
+// Read-only probe for the end-to-end test (only with ?e2e): frames can't hit exact ticks,
+// so the test reads the clock to time its key presses.
+if (new URLSearchParams(window.location.search).has("e2e")) {
+  Object.assign(window, {
+    __pmlt: {
+      get tick() {
+        return session.tick;
+      },
+      get step() {
+        return session.flight?.step ?? 0;
+      },
+      get phase() {
+        return session.phase;
+      },
+    },
+  });
+}
 
 const root = document.getElementById("root");
 if (root) {
