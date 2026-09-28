@@ -53,7 +53,7 @@ export function MissionList({ game }: { game: Controller }) {
           })}
         </ol>
         <p className="label mt-3 text-[10px] opacity-70">
-          Stamps: D delivered · G gentle (contents intact) · F frugal (fuel under par) · uncorrected
+          Stamps: D delivered · G gentle (contents intact) · F frugal (fuel under par)
         </p>
       </div>
     </div>
