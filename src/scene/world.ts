@@ -4,18 +4,12 @@ import type { Prediction } from "../game/predict";
 import type { Cue, Session } from "../game/session";
 import type { Mission, Motion } from "../game/types";
 import { Burst } from "./burst";
+import { type Dock, makeDepot, makeDock, makeParcel } from "./fixtures";
 import { Juice } from "./juice";
+import { Lamps } from "./lamps";
 import { PALETTE } from "./palette";
 import { DotPath, FadingLine, LinePath, makeCross, NearMiss } from "./paths";
-import {
-  makeDepot,
-  makeDock,
-  makeInfluence,
-  makeOrbitRing,
-  makeParcel,
-  makePlanet,
-  makeRock,
-} from "./props";
+import { makeInfluence, makeOrbitRing, makePlanet, makeRock } from "./props";
 import type { Extents, Stage } from "./stage";
 
 export interface Frame {
@@ -43,8 +37,9 @@ export class World {
   private missionGroup = new THREE.Group();
   private movers: Mover[] = [];
   private depot = makeDepot();
-  private dock: THREE.Group | null = null;
-  private readonly parcels = { fragile: makeParcel("fragile"), robust: makeParcel("robust") };
+  private dock: Dock | null = null;
+  private readonly lamps: Lamps;
+  private readonly parcels: Record<"fragile" | "robust", THREE.Group>;
   private readonly guide = new DotPath(PALETTE.cream);
   private readonly course = new DotPath(PALETTE.cream, 260, 0.035);
   private readonly brakeGhost = new DotPath(PALETTE.brass, 260, 0.045);
@@ -58,12 +53,13 @@ export class World {
   private readonly burst = new Burst();
   private readonly v = new THREE.Vector3();
   private readonly juice: Juice;
-  /** Resolves once every texture and environment map the scene needs has loaded. */
-  readonly ready: Promise<unknown> = Promise.resolve();
 
   constructor(stage: Stage) {
     this.stage = stage;
     const s = stage.scene;
+    this.lamps = new Lamps(s);
+    const beacon = this.lamps.beacon.bulb;
+    this.parcels = { fragile: makeParcel("fragile", beacon), robust: makeParcel("robust", beacon) };
     s.add(this.missionGroup, this.depot.group, this.parcels.fragile, this.parcels.robust);
     s.add(this.guide.mesh, this.course.mesh, this.brakeGhost.mesh, this.trail.line);
     s.add(this.lastPath.line, this.guideMiss.group, this.lastMiss.group, this.guideEnd);
@@ -101,12 +97,13 @@ export class World {
       this.addMover(makeRock(o.radius, i * 1.7), o.motion, 0.4);
       this.addOrbit(o.motion, PALETTE.steel, 0.15);
     });
-    this.dock = makeDock(m.dock.name, m.dock.captureRadius);
-    this.addMover(this.dock, m.dock.motion, 0);
+    this.dock = makeDock(m.dock.name, m.dock.captureRadius, this.lamps.dock.bulb);
+    this.addMover(this.dock.group, m.dock.motion, 0);
     this.addOrbit(m.dock.motion, PALETTE.brass, 0.35);
     this.depot.group.position.set(m.depot.x, 0, -m.depot.y);
     this.stage.scene.add(this.missionGroup);
     this.stage.fit(missionExtents(m));
+    this.collectOverlays();
     this.burst.clear();
   }
 
@@ -170,6 +167,8 @@ export class World {
     if (brakeMark) this.lastBrake.position.set(brakeMark.x, 0.03, -brakeMark.y);
 
     this.updateParcel(f);
+    const parcel = this.parcels[s.mission.parcel];
+    this.lamps.update(this.dock, parcel.visible ? parcel : null, this.stage.camera);
     this.burst.update(f.dt);
   }
 
@@ -191,8 +190,8 @@ export class World {
     parcel.visible = !!flight && s.phase !== "aim" && !gone;
     if (!flight || !parcel.visible) return;
     if (delivered && this.dock) {
-      parcel.position.copy(this.dock.position).add(this.v.set(0, 0.42, 0));
-      parcel.rotation.set(0, this.dock.rotation.y, 0);
+      parcel.position.copy(this.dock.group.position).add(this.v.set(0, 0.42, 0));
+      parcel.rotation.set(0, this.dock.group.rotation.y, 0);
       return;
     }
     parcel.position.set(flight.p.x, 0.05, -flight.p.y);
@@ -200,6 +199,21 @@ export class World {
       parcel.rotation.x += f.dt * 2.1;
       parcel.rotation.y += f.dt * 1.3;
     }
+  }
+
+  /** Flat, unlit overlays (guide dots, rings, trails) are kept out of ambient occlusion. */
+  private collectOverlays() {
+    const list = this.stage.aoHidden;
+    list.length = 0;
+    this.stage.scene.traverse((o) => {
+      const mat = (o as THREE.Mesh).material as THREE.Material | undefined;
+      if (
+        mat &&
+        !Array.isArray(mat) &&
+        (mat instanceof THREE.MeshBasicMaterial || mat instanceof THREE.LineBasicMaterial)
+      )
+        list.push(o);
+    });
   }
 
   /** Crash or rejection: scatter debris where the parcel ended. */

@@ -1,7 +1,7 @@
 import * as THREE from "three";
 import type { Cue, Session } from "../game/session";
+import type { Depot } from "./fixtures";
 import { PALETTE } from "./palette";
-import type { Depot } from "./props";
 import { Puff } from "./puff";
 import type { Stage } from "./stage";
 
