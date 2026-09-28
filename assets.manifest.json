@@ -1,0 +1,493 @@
+{
+  "project": "per-my-last-transmission",
+  "generated": "2026-09-28",
+  "shippedBytes": 8192046,
+  "assets": [
+    {
+      "id": "ambientcg-PaintedMetal004",
+      "title": "PaintedMetal004 (1K PBR)",
+      "kind": "texture",
+      "sourceUrl": "https://ambientcg.com/view?id=PaintedMetal004",
+      "download": "https://ambientcg.com/get?file=PaintedMetal004_1K-JPG.zip",
+      "author": "ambientCG (Lennart Demes)",
+      "license": "CC0 1.0",
+      "retrievalDate": "2026-09-28",
+      "processingSteps": [
+        "Downloaded the 1K-JPG zip",
+        "Converted to WebP at 1024 px (colour q82 sRGB; normal q92 linear; ARM q88 linear) with ffmpeg/libwebp",
+        "Packed ARM: R = AmbientOcclusion (white if absent), G = Roughness, B = Metalness (black if absent)"
+      ],
+      "files": {
+        "public/textures/paintedmetal004/arm.webp": "0873ac524a19657529ec1b79dee0049ecebce86658d8ae7bf1fb085a1e129c9b",
+        "public/textures/paintedmetal004/colour.webp": "4ea606eb2ccd08924a4d6d435ef30f5f9955a003dedde53b027a0964c2982f5e",
+        "public/textures/paintedmetal004/normal.webp": "bc580c7edcc34b017c215371602122e192a433e2ba56fbdfe4dc0fbd3caefa45"
+      }
+    },
+    {
+      "id": "ambientcg-PaintedMetal012",
+      "title": "PaintedMetal012 (1K PBR)",
+      "kind": "texture",
+      "sourceUrl": "https://ambientcg.com/view?id=PaintedMetal012",
+      "download": "https://ambientcg.com/get?file=PaintedMetal012_1K-JPG.zip",
+      "author": "ambientCG (Lennart Demes)",
+      "license": "CC0 1.0",
+      "retrievalDate": "2026-09-28",
+      "processingSteps": [
+        "Downloaded the 1K-JPG zip",
+        "Converted to WebP at 1024 px (colour q82 sRGB; normal q92 linear; ARM q88 linear) with ffmpeg/libwebp",
+        "Packed ARM: R = AmbientOcclusion (white if absent), G = Roughness, B = Metalness (black if absent)"
+      ],
+      "files": {
+        "public/textures/paintedmetal012/arm.webp": "f09cb3ce781efc464255291a7f7cc376a1a60150572a0395c0daf989a9cf6fb7",
+        "public/textures/paintedmetal012/colour.webp": "4aa86caaafecb44308d80ff4047fd7b6fbebb9dd06069b2290072ddf436dd5cc",
+        "public/textures/paintedmetal012/normal.webp": "85fec9dcd0ba9c6c84bcb4b2de6bec57cc77e5080a6814cdd85cba957fdb1668"
+      }
+    },
+    {
+      "id": "ambientcg-Metal027",
+      "title": "Metal027 (1K PBR)",
+      "kind": "texture",
+      "sourceUrl": "https://ambientcg.com/view?id=Metal027",
+      "download": "https://ambientcg.com/get?file=Metal027_1K-JPG.zip",
+      "author": "ambientCG (Lennart Demes)",
+      "license": "CC0 1.0",
+      "retrievalDate": "2026-09-28",
+      "processingSteps": [
+        "Downloaded the 1K-JPG zip",
+        "Converted to WebP at 1024 px (colour q82 sRGB; normal q92 linear; ARM q88 linear) with ffmpeg/libwebp",
+        "Packed ARM: R = AmbientOcclusion (white if absent), G = Roughness, B = Metalness (black if absent)"
+      ],
+      "files": {
+        "public/textures/metal027/arm.webp": "2e9e7a2ddf9c00c101f88ff8ef3153217d253d4e188426837e0bd9d7d93cc65a",
+        "public/textures/metal027/colour.webp": "9ace6e87a041e3a8597f360d53577a173b982ce4a4a3a43021738b65b5723e8e",
+        "public/textures/metal027/normal.webp": "e00c73e4c0bacb147f240d6f8a1ea0eecc24edcb109631f33bae696a381da3a2"
+      }
+    },
+    {
+      "id": "ambientcg-Cardboard001",
+      "title": "Cardboard001 (1K PBR)",
+      "kind": "texture",
+      "sourceUrl": "https://ambientcg.com/view?id=Cardboard001",
+      "download": "https://ambientcg.com/get?file=Cardboard001_1K-JPG.zip",
+      "author": "ambientCG (Lennart Demes)",
+      "license": "CC0 1.0",
+      "retrievalDate": "2026-09-28",
+      "processingSteps": [
+        "Downloaded the 1K-JPG zip",
+        "Converted to WebP at 1024 px (colour q82 sRGB; normal q92 linear; ARM q88 linear) with ffmpeg/libwebp",
+        "Packed ARM: R = AmbientOcclusion (white if absent), G = Roughness, B = Metalness (black if absent)"
+      ],
+      "files": {
+        "public/textures/cardboard001/arm.webp": "3430cf9af199627dd77239afd6f5c938e4bd4d1a2bf3f7385fad5381bb94ad6a",
+        "public/textures/cardboard001/colour.webp": "040a645e4632eed05300532dbdc1f496613d12ac29578efcf67c1107e35bdf77",
+        "public/textures/cardboard001/normal.webp": "f080dd22cfd3b5e4717abe16f61dd62d4fa716e14263bf942886c356e4c4e979"
+      }
+    },
+    {
+      "id": "polyhaven-kitchen_wood",
+      "title": "Kitchen Wood (1k diff/nor_gl/arm)",
+      "kind": "texture",
+      "sourceUrl": "https://polyhaven.com/a/kitchen_wood",
+      "author": "Poly Haven",
+      "license": "CC0 1.0",
+      "retrievalDate": "2026-09-26",
+      "via": "Copied from ODD TIDE (WilliamHenryKing/01-odd-tide public/textures) with the owner's authorisation; record carried from its assets.manifest.json",
+      "originalSha256": {
+        "kitchen_wood_diff_1k.jpg": "6d0170f1ab1b9353aab6f0382a7753026e32a5b58f779651cd05a91618dfcdab",
+        "kitchen_wood_nor_gl_1k.jpg": "30d6c1f3f7ad9e6a0e216393d9ee9a489f3b8a6efd9d85237f639e9bfde4cae5",
+        "kitchen_wood_arm_1k.jpg": "fab4a32dc9e08eb307a6d613f2e78ba2c66903c65eec23fa20e41c8796d206fd"
+      },
+      "processingSteps": [
+        "Downloaded 1k JPG maps from the Poly Haven download host",
+        "Shipped unmodified (JPG); colour map sRGB, others linear",
+        "2026-09-28: re-encoded to WebP (1024 px) for this project"
+      ],
+      "files": {
+        "public/textures/kitchen_wood/arm.webp": "1675a9836f2209d62b57b9da966017bab3294203cc0a433def9ad6a541852d27",
+        "public/textures/kitchen_wood/colour.webp": "dbccf4df7c7fb17306901a1445b442bcbf968fd228d03f77c2edb74a73c88963",
+        "public/textures/kitchen_wood/normal.webp": "25226d0766530de99065666a7c71f3afdd54dd19c8ae07c442f0895af7f72697"
+      }
+    },
+    {
+      "id": "polyhaven-rough_linen",
+      "title": "Rough Linen (1k diff/nor_gl/arm)",
+      "kind": "texture",
+      "sourceUrl": "https://polyhaven.com/a/rough_linen",
+      "author": "Poly Haven",
+      "license": "CC0 1.0",
+      "retrievalDate": "2026-09-26",
+      "via": "Copied from ODD TIDE (WilliamHenryKing/01-odd-tide public/textures) with the owner's authorisation; record carried from its assets.manifest.json",
+      "originalSha256": {
+        "rough_linen_diff_1k.jpg": "04897d7611d7390ddf5b2c6f7273f448dfc48341fdbd1f4f207fa30b331d7f57",
+        "rough_linen_nor_gl_1k.jpg": "e2402166d1a489f7414814e69e1836ab672aa24e30bec2d41fea356f81687e53",
+        "rough_linen_arm_1k.jpg": "e1ca6b51ed62834063253e08f8f2e23836aa00d72675b960ddd8e608d9f0c7e6"
+      },
+      "processingSteps": [
+        "Downloaded 1k JPG maps from the Poly Haven download host",
+        "Shipped unmodified (JPG); colour map sRGB, others linear",
+        "2026-09-28: re-encoded to WebP (1024 px) for this project"
+      ],
+      "files": {
+        "public/textures/rough_linen/arm.webp": "1673ea1f82dbe97e3a494994905a860f668033c266e346a417397b5f9de247c9",
+        "public/textures/rough_linen/colour.webp": "93a5687b15c944843cdb9027d72ff9cfc9812b8327c1e0534baa0939516f3028",
+        "public/textures/rough_linen/normal.webp": "67e03fc6b7e8da744b3f6a3d9fecd01be2657ad7af30e61e9b5c845b8c167c5f"
+      }
+    },
+    {
+      "id": "polyhaven-rock_face_03",
+      "title": "Rock Face 03 (2k diff/nor_gl/arm)",
+      "kind": "texture",
+      "sourceUrl": "https://polyhaven.com/a/rock_face_03",
+      "author": "Poly Haven",
+      "license": "CC0 1.0",
+      "retrievalDate": "2026-09-26",
+      "via": "Copied from ODD TIDE (WilliamHenryKing/01-odd-tide public/textures) with the owner's authorisation; record carried from its assets.manifest.json",
+      "originalSha256": {
+        "rock_face_03_diff_2k.jpg": "644ee79df7ffbf5f6afc330b64dd3f33794bab8820915fe61ffe0c88ecfd7ece",
+        "rock_face_03_nor_gl_2k.jpg": "a498cef4ba6191f6959b6d03fb835263c77271948264a289af24497ab7111dec",
+        "rock_face_03_arm_2k.jpg": "1921303981d12bccf72dd29d8a8daf823f1d9bb60400b447c64757203c1e2dad"
+      },
+      "processingSteps": [
+        "Downloaded 2k JPG maps from the Poly Haven download host",
+        "Shipped unmodified (JPG); colour map sRGB, others linear",
+        "2026-09-28: re-encoded to WebP (512 px) for this project"
+      ],
+      "files": {
+        "public/textures/rock_face_03/arm.webp": "244483e14a9d12370fa8c92fb8d43953d8eab455e4062b2762dbce86f677c998",
+        "public/textures/rock_face_03/colour.webp": "d364b19383c82f98d53a70f04326ad7a1241432f17949eddf2f4cfee95efc896",
+        "public/textures/rock_face_03/normal.webp": "ac4a41c3c7e7e5dfd04f1a2b25676ff38b00e4b8cd85f8de804bdbab1d452017"
+      }
+    },
+    {
+      "id": "polyhaven-studio_small_09",
+      "title": "Studio Small 09 (1k HDR)",
+      "kind": "hdri",
+      "sourceUrl": "https://polyhaven.com/a/studio_small_09",
+      "download": "https://dl.polyhaven.org/file/ph-assets/HDRIs/hdr/1k/studio_small_09_1k.hdr",
+      "author": "Sergej Majboroda (Poly Haven)",
+      "license": "CC0 1.0",
+      "retrievalDate": "2026-09-28",
+      "processingSteps": [
+        "Shipped unmodified; prefiltered at runtime with PMREMGenerator for scene.environment and shown blurred as the backdrop"
+      ],
+      "files": {
+        "public/hdri/studio_small_09_1k.hdr": "e7cfda5f4e98e623db12b8bfd0184e048488e4855d9c83e2751fb44a32e80c45"
+      }
+    },
+    {
+      "id": "audio-ambience-space",
+      "title": "OpenGameArt: Another space background track (ObservingTheStar.ogg)",
+      "kind": "audio",
+      "sourceUrl": "https://opengameart.org/content/another-space-background-track",
+      "author": "yd",
+      "license": "CC0 1.0",
+      "retrievalDate": "2026-09-27",
+      "processingSteps": [
+        "Re-encoded to MP3 with ffmpeg/libmp3lame (music 112 kb/s stereo, ambience 56 kb/s mono, effects 96 kb/s mono)"
+      ],
+      "files": {
+        "public/audio/ambience-space.mp3": "4f3e2eb9ed0071b2b60604bf84818cc275aba5d8e02965c74a75a8c10bef270e"
+      }
+    },
+    {
+      "id": "audio-bounce",
+      "title": "Kenney impact-sounds",
+      "kind": "audio",
+      "sourceUrl": "https://kenney.nl/assets/impact-sounds",
+      "author": "Kenney",
+      "license": "CC0 1.0",
+      "retrievalDate": "2026-09-27",
+      "processingSteps": [
+        "Re-encoded to MP3 with ffmpeg/libmp3lame (music 112 kb/s stereo, ambience 56 kb/s mono, effects 96 kb/s mono)"
+      ],
+      "files": {
+        "public/audio/bounce.mp3": "cf7cff991b2fe9b93d21207a3648efa1b69079c124973e5c085529a4a51ae85a"
+      }
+    },
+    {
+      "id": "audio-brake",
+      "title": "Kenney digital-audio",
+      "kind": "audio",
+      "sourceUrl": "https://kenney.nl/assets/digital-audio",
+      "author": "Kenney",
+      "license": "CC0 1.0",
+      "retrievalDate": "2026-09-27",
+      "processingSteps": [
+        "Re-encoded to MP3 with ffmpeg/libmp3lame (music 112 kb/s stereo, ambience 56 kb/s mono, effects 96 kb/s mono)"
+      ],
+      "files": {
+        "public/audio/brake.mp3": "279b8740ef2dfe4afc886dab72e6dca783f87b989f46a188773690ca94ed5429"
+      }
+    },
+    {
+      "id": "audio-circled",
+      "title": "Kenney interface-sounds",
+      "kind": "audio",
+      "sourceUrl": "https://kenney.nl/assets/interface-sounds",
+      "author": "Kenney",
+      "license": "CC0 1.0",
+      "retrievalDate": "2026-09-27",
+      "processingSteps": [
+        "Re-encoded to MP3 with ffmpeg/libmp3lame (music 112 kb/s stereo, ambience 56 kb/s mono, effects 96 kb/s mono)"
+      ],
+      "files": {
+        "public/audio/circled.mp3": "6d693ede8546081c924c1107ef4dbcdadd3dcfc76be87212dafc050aa1dcdbfe"
+      }
+    },
+    {
+      "id": "audio-crashed",
+      "title": "Kenney sci-fi-sounds",
+      "kind": "audio",
+      "sourceUrl": "https://kenney.nl/assets/sci-fi-sounds",
+      "author": "Kenney",
+      "license": "CC0 1.0",
+      "retrievalDate": "2026-09-27",
+      "processingSteps": [
+        "Re-encoded to MP3 with ffmpeg/libmp3lame (music 112 kb/s stereo, ambience 56 kb/s mono, effects 96 kb/s mono)"
+      ],
+      "files": {
+        "public/audio/crashed.mp3": "353c28ee64faac8cf4a7a97f388394d368bb1b1f1f6a45d3f9bf56725f243591"
+      }
+    },
+    {
+      "id": "audio-delivered",
+      "title": "Kenney music-jingles",
+      "kind": "audio",
+      "sourceUrl": "https://kenney.nl/assets/music-jingles",
+      "author": "Kenney",
+      "license": "CC0 1.0",
+      "retrievalDate": "2026-09-27",
+      "processingSteps": [
+        "Re-encoded to MP3 with ffmpeg/libmp3lame (music 112 kb/s stereo, ambience 56 kb/s mono, effects 96 kb/s mono)"
+      ],
+      "files": {
+        "public/audio/delivered.mp3": "a37cd9f15644862a0d538cdfe855a4e0ec927e6264eaac868cb2257491681681"
+      }
+    },
+    {
+      "id": "audio-ending",
+      "title": "Kenney music-jingles",
+      "kind": "audio",
+      "sourceUrl": "https://kenney.nl/assets/music-jingles",
+      "author": "Kenney",
+      "license": "CC0 1.0",
+      "retrievalDate": "2026-09-27",
+      "processingSteps": [
+        "Re-encoded to MP3 with ffmpeg/libmp3lame (music 112 kb/s stereo, ambience 56 kb/s mono, effects 96 kb/s mono)"
+      ],
+      "files": {
+        "public/audio/ending.mp3": "615e490edb88ed607cdb873610a17bf7f862539f480a56aa021eaa3dcfbc5678"
+      }
+    },
+    {
+      "id": "audio-flight-hum",
+      "title": "Kenney sci-fi-sounds",
+      "kind": "audio",
+      "sourceUrl": "https://kenney.nl/assets/sci-fi-sounds",
+      "author": "Kenney",
+      "license": "CC0 1.0",
+      "retrievalDate": "2026-09-27",
+      "processingSteps": [
+        "Re-encoded to MP3 with ffmpeg/libmp3lame (music 112 kb/s stereo, ambience 56 kb/s mono, effects 96 kb/s mono)"
+      ],
+      "files": {
+        "public/audio/flight-hum.mp3": "fdee0c7920bdb5b3a3e2f8e89e47eb296ed49838cb63c3e0e00c98d8e36f0414"
+      }
+    },
+    {
+      "id": "audio-launch-clunk",
+      "title": "Kenney impact-sounds",
+      "kind": "audio",
+      "sourceUrl": "https://kenney.nl/assets/impact-sounds",
+      "author": "Kenney",
+      "license": "CC0 1.0",
+      "retrievalDate": "2026-09-27",
+      "processingSteps": [
+        "Re-encoded to MP3 with ffmpeg/libmp3lame (music 112 kb/s stereo, ambience 56 kb/s mono, effects 96 kb/s mono)"
+      ],
+      "files": {
+        "public/audio/launch-clunk.mp3": "b58deb9e1c52b107f48050e88c111ce0a56f95646c3a4e62bb391359a90eec69"
+      }
+    },
+    {
+      "id": "audio-launch-whoosh",
+      "title": "Kenney sci-fi-sounds",
+      "kind": "audio",
+      "sourceUrl": "https://kenney.nl/assets/sci-fi-sounds",
+      "author": "Kenney",
+      "license": "CC0 1.0",
+      "retrievalDate": "2026-09-27",
+      "processingSteps": [
+        "Re-encoded to MP3 with ffmpeg/libmp3lame (music 112 kb/s stereo, ambience 56 kb/s mono, effects 96 kb/s mono)"
+      ],
+      "files": {
+        "public/audio/launch-whoosh.mp3": "ff9d10fe4247db9048728beefcc8794f6110bc82f26069ce038ecd034235e260"
+      }
+    },
+    {
+      "id": "audio-lost",
+      "title": "Kenney digital-audio",
+      "kind": "audio",
+      "sourceUrl": "https://kenney.nl/assets/digital-audio",
+      "author": "Kenney",
+      "license": "CC0 1.0",
+      "retrievalDate": "2026-09-27",
+      "processingSteps": [
+        "Re-encoded to MP3 with ffmpeg/libmp3lame (music 112 kb/s stereo, ambience 56 kb/s mono, effects 96 kb/s mono)"
+      ],
+      "files": {
+        "public/audio/lost.mp3": "dd85d4c9e5dc003d2533524eaa34030a676511d2769d7d4568162626ac247d88"
+      }
+    },
+    {
+      "id": "audio-music-hold",
+      "title": "OpenGameArt: Elevator Music",
+      "kind": "audio",
+      "sourceUrl": "https://opengameart.org/content/elevator-music",
+      "author": "Pro Sensory",
+      "license": "CC0 1.0",
+      "retrievalDate": "2026-09-27",
+      "processingSteps": [
+        "Re-encoded to MP3 with ffmpeg/libmp3lame (music 112 kb/s stereo, ambience 56 kb/s mono, effects 96 kb/s mono)"
+      ],
+      "files": {
+        "public/audio/music-hold.mp3": "d5ab50c57613f8a63902b2a5098cd71d4d8b7c46c32edfb3b636831024f63150"
+      }
+    },
+    {
+      "id": "audio-rejected",
+      "title": "Kenney impact-sounds",
+      "kind": "audio",
+      "sourceUrl": "https://kenney.nl/assets/impact-sounds",
+      "author": "Kenney",
+      "license": "CC0 1.0",
+      "retrievalDate": "2026-09-27",
+      "processingSteps": [
+        "Re-encoded to MP3 with ffmpeg/libmp3lame (music 112 kb/s stereo, ambience 56 kb/s mono, effects 96 kb/s mono)"
+      ],
+      "files": {
+        "public/audio/rejected.mp3": "e16d5ffb5355005e0a0ce4a61dbd505883075830db59a2891fc369f76d775ee4"
+      }
+    },
+    {
+      "id": "audio-stamp",
+      "title": "Kenney impact-sounds",
+      "kind": "audio",
+      "sourceUrl": "https://kenney.nl/assets/impact-sounds",
+      "author": "Kenney",
+      "license": "CC0 1.0",
+      "retrievalDate": "2026-09-27",
+      "processingSteps": [
+        "Re-encoded to MP3 with ffmpeg/libmp3lame (music 112 kb/s stereo, ambience 56 kb/s mono, effects 96 kb/s mono)"
+      ],
+      "files": {
+        "public/audio/stamp.mp3": "e6ca563c48581e73e37000d445cc0d59596b7b9594f2959e52cbc7685328366b"
+      }
+    },
+    {
+      "id": "audio-ui-click",
+      "title": "Kenney interface-sounds",
+      "kind": "audio",
+      "sourceUrl": "https://kenney.nl/assets/interface-sounds",
+      "author": "Kenney",
+      "license": "CC0 1.0",
+      "retrievalDate": "2026-09-27",
+      "processingSteps": [
+        "Re-encoded to MP3 with ffmpeg/libmp3lame (music 112 kb/s stereo, ambience 56 kb/s mono, effects 96 kb/s mono)"
+      ],
+      "files": {
+        "public/audio/ui-click.mp3": "392f27ac2460c2fc734143e9eed38a1cf02e4c12052e3a22fb988754995fa011"
+      }
+    },
+    {
+      "id": "audio-ui-close",
+      "title": "Kenney interface-sounds",
+      "kind": "audio",
+      "sourceUrl": "https://kenney.nl/assets/interface-sounds",
+      "author": "Kenney",
+      "license": "CC0 1.0",
+      "retrievalDate": "2026-09-27",
+      "processingSteps": [
+        "Re-encoded to MP3 with ffmpeg/libmp3lame (music 112 kb/s stereo, ambience 56 kb/s mono, effects 96 kb/s mono)"
+      ],
+      "files": {
+        "public/audio/ui-close.mp3": "9dfecfc049afdce2afe7e5a7ad49e1fb8be6b1ac821f24bd3dfed1b1c255c2c6"
+      }
+    },
+    {
+      "id": "audio-ui-next",
+      "title": "Kenney interface-sounds",
+      "kind": "audio",
+      "sourceUrl": "https://kenney.nl/assets/interface-sounds",
+      "author": "Kenney",
+      "license": "CC0 1.0",
+      "retrievalDate": "2026-09-27",
+      "processingSteps": [
+        "Re-encoded to MP3 with ffmpeg/libmp3lame (music 112 kb/s stereo, ambience 56 kb/s mono, effects 96 kb/s mono)"
+      ],
+      "files": {
+        "public/audio/ui-next.mp3": "f3be3817b9dea414045b337fcfc4d02426968325c2d4a11c2d4b2758f2cea822"
+      }
+    },
+    {
+      "id": "audio-ui-open",
+      "title": "Kenney interface-sounds",
+      "kind": "audio",
+      "sourceUrl": "https://kenney.nl/assets/interface-sounds",
+      "author": "Kenney",
+      "license": "CC0 1.0",
+      "retrievalDate": "2026-09-27",
+      "processingSteps": [
+        "Re-encoded to MP3 with ffmpeg/libmp3lame (music 112 kb/s stereo, ambience 56 kb/s mono, effects 96 kb/s mono)"
+      ],
+      "files": {
+        "public/audio/ui-open.mp3": "d0f6efd368efd97f4dfd0c81117e5720b97a9530a7453cc588d196587422c65d"
+      }
+    },
+    {
+      "id": "audio-ui-retry",
+      "title": "Kenney interface-sounds",
+      "kind": "audio",
+      "sourceUrl": "https://kenney.nl/assets/interface-sounds",
+      "author": "Kenney",
+      "license": "CC0 1.0",
+      "retrievalDate": "2026-09-27",
+      "processingSteps": [
+        "Re-encoded to MP3 with ffmpeg/libmp3lame (music 112 kb/s stereo, ambience 56 kb/s mono, effects 96 kb/s mono)"
+      ],
+      "files": {
+        "public/audio/ui-retry.mp3": "0e58b762dbbc525d7d73fe32b42fffa4af5ac35137c5d61b7ceeea004a2ca362"
+      }
+    },
+    {
+      "id": "audio-ui-tick",
+      "title": "Kenney interface-sounds",
+      "kind": "audio",
+      "sourceUrl": "https://kenney.nl/assets/interface-sounds",
+      "author": "Kenney",
+      "license": "CC0 1.0",
+      "retrievalDate": "2026-09-27",
+      "processingSteps": [
+        "Re-encoded to MP3 with ffmpeg/libmp3lame (music 112 kb/s stereo, ambience 56 kb/s mono, effects 96 kb/s mono)"
+      ],
+      "files": {
+        "public/audio/ui-tick.mp3": "0f67932fc6557b84d95be51e2bf613a39fc6bd39c9bcbcc116a6fb0a5243cc26"
+      }
+    },
+    {
+      "id": "audio-ui-toggle",
+      "title": "Kenney interface-sounds",
+      "kind": "audio",
+      "sourceUrl": "https://kenney.nl/assets/interface-sounds",
+      "author": "Kenney",
+      "license": "CC0 1.0",
+      "retrievalDate": "2026-09-27",
+      "processingSteps": [
+        "Re-encoded to MP3 with ffmpeg/libmp3lame (music 112 kb/s stereo, ambience 56 kb/s mono, effects 96 kb/s mono)"
+      ],
+      "files": {
+        "public/audio/ui-toggle.mp3": "2eea75cb3613b29d03a851895ac686bdf37ec8686c7990b0f11045dbd66bea6f"
+      }
+    }
+  ]
+}
