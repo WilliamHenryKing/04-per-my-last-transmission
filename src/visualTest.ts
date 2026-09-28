@@ -1,3 +1,4 @@
+import { DT } from "./game/physics";
 import type { Session } from "./game/session";
 import { BOOKMARKS, type Bookmark, shotFor } from "./scene/bookmarks";
 import type { Stage } from "./scene/stage";
@@ -7,9 +8,12 @@ import type { Stage } from "./scene/stage";
 //   __VISUAL_TEST__.freeze(true)       stop game time and decorative motion
 //   __VISUAL_TEST__.setBookmark(name)  fixed camera shot (null returns to the game camera)
 //   await __VISUAL_TEST__.settle(n)    wait n rendered frames
+//   __VISUAL_TEST__.advance(seconds)   step frozen game time exactly (fixed steps)
 
 export interface VisualHooks {
   frozen: boolean;
+  /** Time stepped by advance() while frozen, handed once to the next frame's animations. */
+  takeDt(): number;
   /** Called by the frame loop after each render. */
   onFrame(): void;
 }
@@ -21,8 +25,14 @@ export function installVisualTest(
   firstFrame: Promise<void>,
 ): VisualHooks {
   const waiters: { left: number; done: () => void }[] = [];
+  let banked = 0;
   const hooks: VisualHooks = {
     frozen: false,
+    takeDt() {
+      const dt = Math.min(banked, 0.1);
+      banked = 0;
+      return dt;
+    },
     onFrame() {
       for (let i = waiters.length - 1; i >= 0; i--) {
         const w = waiters[i];
@@ -49,6 +59,14 @@ export function installVisualTest(
     setBookmark(name: Bookmark | null) {
       document.documentElement.dataset.visualBookmark = name ?? "";
       stage.setShot(name ? shotFor(name, session.mission, session.time) : null);
+    },
+    advance(seconds: number) {
+      const frozen = hooks.frozen;
+      hooks.frozen = false;
+      const steps = Math.round(seconds / DT);
+      for (let i = 0; i < steps; i++) session.advance(DT);
+      hooks.frozen = frozen;
+      banked += steps * DT;
     },
     settle(frames = 3) {
       return new Promise<void>((done) => waiters.push({ left: frames, done }));

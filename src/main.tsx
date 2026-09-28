@@ -81,7 +81,10 @@ const visual: VisualHooks | null =
 
 function frame(now: number) {
   // Clamp: a backwards timestamp must never rewind the world, a stall never leaps it.
-  const dt = visual?.frozen ? 0 : Math.max(0, Math.min(0.1, (now - prev) / 1000));
+  const frameMs = now - prev;
+  const dt = visual?.frozen ? 0 : Math.max(0, Math.min(0.1, frameMs / 1000));
+  // While a capture holds time frozen, animations advance only by what advance() stepped.
+  const animDt = visual?.frozen ? visual.takeDt() : dt;
   prev = now;
   if (missionShown !== session.mission.id) {
     missionShown = session.mission.id;
@@ -94,7 +97,7 @@ function frame(now: number) {
     const v = session.outcome?.verdict;
     if (v === "crashed" || v === "rejected") world.shatter(motionQuery.matches);
   }
-  game.frame(dt, cues);
+  game.frame(animDt, cues);
   for (const cue of cues) {
     for (const hit of hitsForCue(cue, session.outcome?.verdict ?? null)) {
       audio.play(hit.id, hit.delay, hit.rate);
@@ -110,13 +113,13 @@ function frame(now: number) {
   const f = session.flight;
   world.update({
     session,
-    dt,
+    dt: animDt,
     reducedMotion: motionQuery.matches,
     guide: session.phase === "aim" ? predictLaunch(m, session.tick, session.aim) : null,
     course: session.phase === "flight" && f ? predictFrom(m, f, m.guideSeconds) : null,
     brakeGhost: session.phase === "flight" && f ? predictBrake(m, f) : null,
   });
-  stage.render();
+  stage.render(frameMs);
   visual?.onFrame();
   if (first) {
     first = false;

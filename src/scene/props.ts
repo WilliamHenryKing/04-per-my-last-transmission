@@ -56,8 +56,8 @@ export function makePlanet(look: BodyLook, radius: number, seed: number): THREE.
       roughnessMap,
       roughness: 1,
       // A fired ceramic glaze: a satin coat over a softer body, not a glass mirror.
-      clearcoat: 0.65,
-      clearcoatRoughness: 0.16,
+      clearcoat: 0.5,
+      clearcoatRoughness: 0.22,
     }),
   );
   sphere.castShadow = true;

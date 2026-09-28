@@ -23,7 +23,8 @@ export interface Stage {
   camera: THREE.PerspectiveCamera;
   fit(extents: Extents): void;
   resize(): void;
-  render(): void;
+  /** Draw a frame; `frameMs` (the real frame interval) feeds adaptive quality. */
+  render(frameMs?: number): void;
   toGround(clientX: number, clientY: number): { x: number; y: number } | null;
   /** A short camera jolt, e.g. when a stamp slams down. */
   nudge(strength: number, delay?: number): void;
@@ -111,6 +112,8 @@ export function createStage(canvas: HTMLCanvasElement): Stage {
   const camera = new THREE.PerspectiveCamera(GAME_FOV, 1, 0.05, 400);
   let extents: Extents = { minX: -8, maxX: 8, minY: -5, maxY: 5 };
   const pipeline = new Pipeline(renderer, scene, camera, tier, () => aoHidden);
+  const query = new URLSearchParams(window.location.search);
+  pipeline.adaptive = !query.has("e2e") && !query.has("quality");
 
   // Shadows fitted to the mission and snapped to whole texels, so they never shimmer.
   function fitShadow() {
@@ -218,7 +221,8 @@ export function createStage(canvas: HTMLCanvasElement): Stage {
       place();
     },
     resize,
-    render() {
+    render(frameMs = 0) {
+      pipeline.adapt(frameMs);
       pipeline.render();
     },
     setShot(next) {

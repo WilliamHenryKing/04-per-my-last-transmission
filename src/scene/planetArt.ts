@@ -9,7 +9,7 @@ const W = 1024;
 const H = 512;
 
 const LOOKS: Record<BodyLook, { base: string; accent: string; deep: string }> = {
-  moon: { base: "#ece4d2", accent: "#b9ae99", deep: "#8f8577" },
+  moon: { base: "#e6d9bf", accent: "#a08f73", deep: "#5e5343" },
   rust: { base: "#d9743f", accent: "#a8452b", deep: "#f1b27b" },
   gas: { base: "#2f9c95", accent: "#f3ead7", deep: "#1c6a70" },
   ice: { base: "#d8e8f1", accent: "#94bcd6", deep: "#ffffff" },

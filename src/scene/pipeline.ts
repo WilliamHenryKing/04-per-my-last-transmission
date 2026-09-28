@@ -95,6 +95,25 @@ export class Pipeline {
     this.composer.addPass(new OutputPass());
   }
 
+  private slowFor = 0;
+  private ema = 16.7;
+  /** Adaptation is off for tests and captures, which must render the full chain. */
+  adaptive = true;
+
+  /**
+   * Adaptive quality: when frames stay slower than ~52 fps for two seconds, drop the most
+   * expensive pass (GTAO). One step only, and it never comes back mid-session.
+   */
+  adapt(frameMs: number) {
+    if (!this.adaptive || !this.ao?.enabled || frameMs <= 0 || frameMs > 250) return;
+    this.ema += (frameMs - this.ema) * 0.1;
+    this.slowFor = this.ema > 19 ? this.slowFor + frameMs : 0;
+    if (this.slowFor > 2000) {
+      this.ao.enabled = false;
+      console.info("PMLT: frame time above budget; ambient occlusion disabled");
+    }
+  }
+
   setSize(width: number, height: number, pixelRatio: number) {
     this.composer.setPixelRatio(pixelRatio);
     this.composer.setSize(width, height);
