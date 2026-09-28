@@ -3,6 +3,7 @@ import { AudioEngine } from "./audio/engine";
 import { hitsForCue } from "./audio/sounds";
 import { predictBrake, predictFrom, predictLaunch } from "./game/predict";
 import { worldReady } from "./loader";
+import { whenLoaded } from "./scene/assets";
 import { createStage } from "./scene/stage";
 import { World } from "./scene/world";
 import { App } from "./ui/App";
@@ -75,7 +76,7 @@ const params = new URLSearchParams(window.location.search);
 // Capture hooks for visual evidence exist only in dev builds and ?e2e runs.
 const visual: VisualHooks | null =
   import.meta.env.DEV || params.has("e2e")
-    ? installVisualTest(stage, session, world.ready, firstFrame)
+    ? installVisualTest(stage, session, whenLoaded, firstFrame)
     : null;
 
 function frame(now: number) {

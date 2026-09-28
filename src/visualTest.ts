@@ -17,7 +17,7 @@ export interface VisualHooks {
 export function installVisualTest(
   stage: Stage,
   session: Session,
-  assetsReady: Promise<unknown>,
+  assetsReady: () => Promise<unknown>,
   firstFrame: Promise<void>,
 ): VisualHooks {
   const waiters: { left: number; done: () => void }[] = [];
@@ -37,7 +37,7 @@ export function installVisualTest(
   };
   const api = {
     bookmarks: [...BOOKMARKS],
-    ready: Promise.all([assetsReady, firstFrame]).then(() => {
+    ready: firstFrame.then(assetsReady).then(() => {
       api.isReady = true;
       return true;
     }),

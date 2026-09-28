@@ -1,6 +1,8 @@
 import * as THREE from "three";
+import { loadEnvironment } from "./assets";
 import { PALETTE } from "./palette";
-import { makeGrainMap, makeStarChartMap } from "./tableArt";
+import { Pipeline, pickTier, type Tier } from "./pipeline";
+import { makeTable, TABLE_TOP } from "./table";
 
 // Renderer, camera, lights and the enamel table the miniature sits on.
 // Sim coordinates (x, y) map to world (x, 0, -y) so "up" in the plane is away from camera.
@@ -15,6 +17,9 @@ export interface Extents {
 export interface Stage {
   renderer: THREE.WebGLRenderer;
   scene: THREE.Scene;
+  tier: Tier;
+  /** Flat overlays (guide dots, rings, signs) that ambient occlusion must not darken around. */
+  aoHidden: THREE.Object3D[];
   camera: THREE.PerspectiveCamera;
   fit(extents: Extents): void;
   resize(): void;
@@ -38,90 +43,96 @@ const GAME_FOV = 34;
 
 const ELEVATION = THREE.MathUtils.degToRad(58);
 
-function makeStars(): THREE.Points {
-  const n = 900;
-  const pos = new Float32Array(n * 3);
-  let seed = 7;
-  const rnd = () => {
-    seed = (seed * 16807) % 2147483647;
-    return seed / 2147483647;
-  };
-  for (let i = 0; i < n; i++) {
-    const u = rnd() * 2 - 1;
-    const a = rnd() * Math.PI * 2;
-    const s = Math.sqrt(1 - u * u);
-    pos.set([Math.cos(a) * s * 90, u * 60 - 20, Math.sin(a) * s * 90], i * 3);
-  }
-  const g = new THREE.BufferGeometry();
-  g.setAttribute("position", new THREE.BufferAttribute(pos, 3));
-  const mat = new THREE.PointsMaterial({ color: PALETTE.cream, size: 0.35, sizeAttenuation: true });
-  return new THREE.Points(g, mat);
+/** One key light: a warm studio softbox high to the left, shadowing the whole mission. */
+function makeKey(tier: Tier): THREE.DirectionalLight {
+  const key = new THREE.DirectionalLight(0xfff1dc, 2.4);
+  key.castShadow = true;
+  const size = tier === "high" ? 2048 : 1024;
+  key.shadow.mapSize.set(size, size);
+  key.shadow.radius = 3;
+  key.shadow.bias = -0.0002;
+  return key;
 }
 
-function makeTable(): THREE.Group {
-  const group = new THREE.Group();
-  const slab = new THREE.Mesh(
-    new THREE.BoxGeometry(24, 0.6, 16),
-    new THREE.MeshPhysicalMaterial({
-      color: PALETTE.table,
-      map: makeGrainMap(),
-      emissive: 0xffffff,
-      emissiveMap: makeStarChartMap(),
-      emissiveIntensity: 0.9,
-      roughness: 0.55,
-      clearcoat: 0.5,
-      clearcoatRoughness: 0.4,
-    }),
-  );
-  slab.position.y = -1.9;
-  slab.receiveShadow = true;
-  group.add(slab);
-  const grid = new THREE.GridHelper(24, 24, PALETTE.grid, PALETTE.grid);
-  grid.position.y = -1.595;
-  grid.scale.z = 16 / 24;
-  (grid.material as THREE.Material).transparent = true;
-  (grid.material as THREE.Material).opacity = 0.4;
-  group.add(grid);
-  const trim = new THREE.Mesh(
-    new THREE.BoxGeometry(24.4, 0.2, 16.4),
-    new THREE.MeshStandardMaterial({ color: PALETTE.brass, metalness: 0.6, roughness: 0.35 }),
-  );
-  trim.position.y = -2.25;
-  group.add(trim);
-  return group;
+// Aerial perspective (from ODD TIDE's rig): physical extinction 1 − e^(−σd) over the true view
+// distance, instead of three's squared falloff, so depth reads as haze rather than a wall.
+let fogPatched = false;
+function patchFog() {
+  if (fogPatched) return;
+  fogPatched = true;
+  THREE.ShaderChunk.fog_vertex = /* glsl */ `
+#ifdef USE_FOG
+  vFogDepth = length( mvPosition.xyz );
+#endif`;
+  THREE.ShaderChunk.fog_fragment = /* glsl */ `
+#ifdef USE_FOG
+  #ifdef FOG_EXP2
+    float fogFactor = 1.0 - exp( - fogDensity * vFogDepth );
+  #else
+    float fogFactor = smoothstep( fogNear, fogFar, vFogDepth );
+  #endif
+  gl_FragColor.rgb = mix( gl_FragColor.rgb, fogColor, fogFactor );
+#endif`;
 }
+
+const KEY_DIRECTION = new THREE.Vector3(-0.45, 1, 0.5).normalize();
 
 export function createStage(canvas: HTMLCanvasElement): Stage {
+  const tier = pickTier();
+  // Antialiasing lives in the pipeline (MSAA target + SMAA), so the canvas itself has none.
   const renderer = new THREE.WebGLRenderer({
     canvas,
-    antialias: true,
+    antialias: false,
+    stencil: false,
     powerPreference: "high-performance",
   });
-  renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+  const pixelRatio = Math.min(window.devicePixelRatio, tier === "high" ? 2 : 1.5);
+  renderer.setPixelRatio(pixelRatio);
+  // One tone mapper (AgX), applied once by the pipeline's OutputPass; exposure is the one
+  // brightness control.
   renderer.toneMapping = THREE.AgXToneMapping;
-  renderer.toneMappingExposure = 1.15;
+  renderer.toneMappingExposure = 1.05;
   renderer.outputColorSpace = THREE.SRGBColorSpace;
   renderer.shadowMap.enabled = true;
   renderer.shadowMap.type = THREE.PCFShadowMap;
 
+  patchFog();
   const scene = new THREE.Scene();
+  // Haze tinted like the dimmed studio backdrop, in scene-linear units.
+  scene.fog = new THREE.FogExp2(new THREE.Color(0.028, 0.03, 0.038), 0.009);
   scene.background = new THREE.Color(PALETTE.space);
-  scene.add(makeStars(), makeTable());
+  scene.add(makeTable());
+  loadEnvironment(renderer, scene);
 
-  scene.add(new THREE.HemisphereLight(0xbfd2ff, 0x3a2a36, 1.3));
-  const key = new THREE.DirectionalLight(0xfff0d8, 2.8);
-  key.position.set(-6, 14, 7);
-  key.castShadow = true;
-  key.shadow.mapSize.set(1024, 1024);
-  key.shadow.camera.left = -13;
-  key.shadow.camera.right = 13;
-  key.shadow.camera.top = 10;
-  key.shadow.camera.bottom = -10;
-  key.shadow.radius = 4;
-  scene.add(key);
+  const key = makeKey(tier);
+  scene.add(key, key.target);
+  const aoHidden: THREE.Object3D[] = [];
 
   const camera = new THREE.PerspectiveCamera(GAME_FOV, 1, 0.05, 400);
   let extents: Extents = { minX: -8, maxX: 8, minY: -5, maxY: 5 };
+  const pipeline = new Pipeline(renderer, scene, camera, tier, () => aoHidden);
+
+  // Shadows fitted to the mission and snapped to whole texels, so they never shimmer.
+  function fitShadow() {
+    const cx = (extents.minX + extents.maxX) / 2;
+    const cz = -(extents.minY + extents.maxY) / 2;
+    const radius = Math.hypot(extents.maxX - extents.minX, extents.maxY - extents.minY) / 2 + 1.5;
+    const cam = key.shadow.camera;
+    cam.left = -radius;
+    cam.right = radius;
+    cam.top = radius;
+    cam.bottom = -radius;
+    cam.near = 0.5;
+    cam.far = radius * 4 + 10;
+    cam.updateProjectionMatrix();
+    const texel = (2 * radius) / key.shadow.mapSize.x;
+    const snap = (v: number) => Math.round(v / texel) * texel;
+    const centre = new THREE.Vector3(snap(cx), TABLE_TOP, snap(cz));
+    key.target.position.copy(centre);
+    key.position.copy(centre).addScaledVector(KEY_DIRECTION, radius * 2 + 4);
+    key.target.updateMatrixWorld();
+    key.shadow.normalBias = texel * 0.8;
+  }
 
   const baseTarget = new THREE.Vector3();
   const basePosition = new THREE.Vector3();
@@ -187,6 +198,7 @@ export function createStage(canvas: HTMLCanvasElement): Stage {
     const w = canvas.clientWidth;
     const h = canvas.clientHeight;
     renderer.setSize(w, h, false);
+    pipeline.setSize(w, h, pixelRatio);
     place();
   }
 
@@ -198,13 +210,16 @@ export function createStage(canvas: HTMLCanvasElement): Stage {
     renderer,
     scene,
     camera,
+    tier,
+    aoHidden,
     fit(next) {
       extents = next;
+      fitShadow();
       place();
     },
     resize,
     render() {
-      renderer.render(scene, camera);
+      pipeline.render();
     },
     setShot(next) {
       shot = next;
