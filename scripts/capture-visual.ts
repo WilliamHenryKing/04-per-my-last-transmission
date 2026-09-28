@@ -31,6 +31,7 @@ async function run(page: Page, frames: number) {
 
 async function open(browser: Browser, width: number, height: number, scale: number) {
   const page = await browser.newPage({ viewport: { width, height }, deviceScaleFactor: scale });
+  page.setDefaultTimeout(300_000);
   await page.addInitScript(() => {
     localStorage.setItem("pmlt.hint.v1", "seen");
     localStorage.setItem("pmlt.muted.v1", "1");
@@ -54,7 +55,8 @@ async function open(browser: Browser, width: number, height: number, scale: numb
 async function shoot(page: Page, name: string, file = name) {
   await page.evaluate(`${api}.setBookmark(${JSON.stringify(name)})`);
   await run(page, 4);
-  await page.screenshot({ path: join(OUT, `${file}.png`) });
+  // SwiftShader renders the full post chain on the CPU: frames can take many seconds.
+  await page.screenshot({ path: join(OUT, `${file}.png`), timeout: 300_000 });
 }
 
 const server = spawn("bunx", ["vite", "preview"], { stdio: "ignore" });

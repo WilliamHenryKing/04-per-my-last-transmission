@@ -5,12 +5,14 @@ import { defineConfig } from "@playwright/test";
 export default defineConfig({
   testDir: "e2e",
   testMatch: "**/*.e2e.ts",
-  timeout: 120_000,
+  // SwiftShader renders the full material set on the CPU (~0.3 s a frame, plus ~30 s of first
+  // shader compilation), so the one gameplay test gets a generous budget.
+  timeout: 300_000,
   reporter: "list",
   use: {
     baseURL: "http://127.0.0.1:4614",
     // Small viewport: SwiftShader renders every frame on the CPU.
-    viewport: { width: 800, height: 500 },
+    viewport: { width: 640, height: 400 },
     launchOptions: {
       args: ["--use-gl=angle", "--use-angle=swiftshader", "--enable-unsafe-swiftshader"],
     },
@@ -19,6 +21,8 @@ export default defineConfig({
     command: "bun run build && bun run preview",
     url: "http://127.0.0.1:4614",
     reuseExistingServer: true,
-    timeout: 120_000,
+    // SwiftShader renders the full material set on the CPU (~0.3 s a frame, plus ~30 s of first
+    // shader compilation), so the one gameplay test gets a generous budget.
+    timeout: 300_000,
   },
 });

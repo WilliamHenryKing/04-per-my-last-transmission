@@ -29,7 +29,8 @@ test("mission 1: aim, launch, brake and get the mug signed for", async ({ page }
   const errors: string[] = [];
   page.on("pageerror", (e) => errors.push(String(e)));
   await page.clock.install();
-  await page.goto("/?e2e");
+  // Gameplay test: the light render tier keeps SwiftShader frames fast.
+  await page.goto("/?e2e&quality=low");
   await expect(page.locator("#arrival")).toHaveCount(0, { timeout: 20_000 });
   await page.clock.pauseAt(Date.now() + 60_000);
 
