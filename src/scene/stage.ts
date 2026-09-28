@@ -24,7 +24,17 @@ export interface Stage {
   nudge(strength: number, delay?: number): void;
   /** Per frame: ease gently toward a point of interest (or back to rest when null). */
   follow(dt: number, focus: { x: number; y: number } | null): void;
+  /** Visual-test override: a fixed camera shot, or null to return to the game camera. */
+  setShot(shot: CameraShot | null): void;
 }
+
+export interface CameraShot {
+  position: THREE.Vector3;
+  target: THREE.Vector3;
+  fov: number;
+}
+
+const GAME_FOV = 34;
 
 const ELEVATION = THREE.MathUtils.degToRad(58);
 
@@ -110,7 +120,7 @@ export function createStage(canvas: HTMLCanvasElement): Stage {
   key.shadow.radius = 4;
   scene.add(key);
 
-  const camera = new THREE.PerspectiveCamera(34, 1, 0.1, 400);
+  const camera = new THREE.PerspectiveCamera(GAME_FOV, 1, 0.05, 400);
   let extents: Extents = { minX: -8, maxX: 8, minY: -5, maxY: 5 };
 
   const baseTarget = new THREE.Vector3();
@@ -123,7 +133,14 @@ export function createStage(canvas: HTMLCanvasElement): Stage {
   let shakeWait = 0;
 
   // The resting view plus a smoothed drift toward the action and a decaying shake.
+  let shot: CameraShot | null = null;
+
   function aimCamera() {
+    if (shot) {
+      camera.position.copy(shot.position);
+      camera.lookAt(shot.target);
+      return;
+    }
     camera.position.copy(basePosition).add(drift).add(shake);
     camera.lookAt(wanted.copy(baseTarget).add(drift));
   }
@@ -158,9 +175,11 @@ export function createStage(canvas: HTMLCanvasElement): Stage {
       .copy(target)
       .add(back)
       .add(new THREE.Vector3(0, Math.sin(ELEVATION) * dist, 0));
+    camera.fov = shot?.fov ?? GAME_FOV;
     aimCamera();
     // Nudge the view so the play area sits slightly above the control panel.
-    camera.setViewOffset(w, h, 0, portrait ? h * 0.07 : h * 0.03, w, h);
+    if (shot) camera.clearViewOffset();
+    else camera.setViewOffset(w, h, 0, portrait ? h * 0.07 : h * 0.03, w, h);
     camera.updateProjectionMatrix();
   }
 
@@ -186,6 +205,10 @@ export function createStage(canvas: HTMLCanvasElement): Stage {
     resize,
     render() {
       renderer.render(scene, camera);
+    },
+    setShot(next) {
+      shot = next;
+      place();
     },
     nudge(strength, delay = 0) {
       shakeStrength = strength;

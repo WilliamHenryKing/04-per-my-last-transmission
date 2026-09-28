@@ -7,6 +7,7 @@ import { createStage } from "./scene/stage";
 import { World } from "./scene/world";
 import { App } from "./ui/App";
 import { Controller } from "./ui/controller";
+import { installVisualTest, type VisualHooks } from "./visualTest";
 import "./ui/styles.css";
 
 // Wiring: one controller (rules + UI state), one three.js world, one frame loop.
@@ -66,10 +67,20 @@ stage.resize();
 
 let prev = performance.now();
 let first = true;
+let firstDrawn: () => void = () => {};
+const firstFrame = new Promise<void>((done) => {
+  firstDrawn = done;
+});
+const params = new URLSearchParams(window.location.search);
+// Capture hooks for visual evidence exist only in dev builds and ?e2e runs.
+const visual: VisualHooks | null =
+  import.meta.env.DEV || params.has("e2e")
+    ? installVisualTest(stage, session, world.ready, firstFrame)
+    : null;
 
 function frame(now: number) {
   // Clamp: a backwards timestamp must never rewind the world, a stall never leaps it.
-  const dt = Math.max(0, Math.min(0.1, (now - prev) / 1000));
+  const dt = visual?.frozen ? 0 : Math.max(0, Math.min(0.1, (now - prev) / 1000));
   prev = now;
   if (missionShown !== session.mission.id) {
     missionShown = session.mission.id;
@@ -105,8 +116,10 @@ function frame(now: number) {
     brakeGhost: session.phase === "flight" && f ? predictBrake(m, f) : null,
   });
   stage.render();
+  visual?.onFrame();
   if (first) {
     first = false;
+    firstDrawn();
     requestAnimationFrame(() => worldReady());
   }
   requestAnimationFrame(frame);
@@ -115,7 +128,7 @@ requestAnimationFrame(frame);
 
 // Read-only probe for the end-to-end test (only with ?e2e): frames can't hit exact ticks,
 // so the test reads the clock to time its key presses.
-if (new URLSearchParams(window.location.search).has("e2e")) {
+if (params.has("e2e")) {
   Object.assign(window, {
     __pmlt: {
       get tick() {

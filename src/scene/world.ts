@@ -58,6 +58,8 @@ export class World {
   private readonly burst = new Burst();
   private readonly v = new THREE.Vector3();
   private readonly juice: Juice;
+  /** Resolves once every texture and environment map the scene needs has loaded. */
+  readonly ready: Promise<unknown> = Promise.resolve();
 
   constructor(stage: Stage) {
     this.stage = stage;

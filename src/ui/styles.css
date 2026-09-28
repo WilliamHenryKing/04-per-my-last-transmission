@@ -220,3 +220,10 @@ canvas.stage {
   clip: rect(0 0 0 0);
   white-space: nowrap;
 }
+
+/* Visual-test bookmarks that judge the render alone hide the HUD. */
+html[data-visual-bookmark="wide"] #root,
+html[data-visual-bookmark="closeup"] #root,
+html[data-visual-bookmark="grazing"] #root {
+  visibility: hidden;
+}
