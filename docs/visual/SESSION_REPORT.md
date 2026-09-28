@@ -53,3 +53,16 @@ I copied three Poly Haven texture sets (kitchen_wood, rough_linen, rock_face_03)
 - **Alpha-tested foliage:** there is no foliage in this game.
 - **Remaining flaws** (full list in AUDIT.md): an over-scaled rust pattern on the café hut, a plain grey studio wall behind the table, the HUD covering the cannon in the hero framing, and crater strokes on the moon that repeat.
 - **Scoring is my own judgement** from the captures. The luminance relationships are measured, from `wide.png` crops.
+
+## Where this session stopped
+
+The session stopped at the testing session's request because the cloud credit had run out. The fidelity pass was already complete and pushed when the stop arrived (`eaf2b6a`): there is no work in progress and no `WIP:` commit. At the stop, `bun run check` passed (strict tsc, Biome, 40 unit tests, production build), and the Playwright e2e test last passed on the final build (3.0 min on SwiftShader, `?quality=low`).
+
+What is left, for the local session:
+1. **Verify on a real GPU:** check that the high tier holds about 60 fps at 1440×900 on the RTX 2060, and tune `Pipeline.adapt` (the 19 ms / 2 s threshold in `src/scene/pipeline.ts`) from real frame times.
+2. **Fix the remaining flaws listed in AUDIT.md**, in priority order:
+   - Scale the PaintedMetal012 rust down on the café hut (texture repeat of about 3 there).
+   - Add a darker, more characterful studio backdrop, or lower `backgroundIntensity` below 0.07 and re-measure the backdrop-to-table ratio.
+   - Reframe the hero bookmark so the HUD bar does not cover the cannon.
+   - Vary the moon's crater rim strokes (`src/scene/planetArt.ts`).
+3. **Recapture and rescore:** after any visual change, run `bun run build && bun scripts/capture-visual.ts after`, rescore in AUDIT.md, and refresh the README media with `bun scripts/capture-readme.ts` (needs `ffmpeg` on PATH or `FFMPEG=/path/to/ffmpeg`).
