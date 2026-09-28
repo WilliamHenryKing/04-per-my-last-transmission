@@ -64,7 +64,7 @@ Three.js 0.186 (no React Three Fiber) · TypeScript (strict) · React 19 for the
 - **Deterministic orbital flight.** Planets, moons and docks ride analytic orbits. The parcel is integrated at a fixed 120 Hz step, and the world clock counts whole ticks, so the same inputs always produce the same flight. Retry restarts the clock, which makes every attempt reproducible.
 - **Honest path prediction.** The guide, the brake ghost and the real flight all call the same `step()` function. A unit test asserts that the prediction matches the flight to the bit.
 - **Solver-verified missions.** `scripts/solve.ts` grid-searches launch timing, angle, power and brake moment for each mission. Every mission ships with a reference route that the tests fly, and an end-to-end Playwright test delivers mission 1 through the real UI.
-- **Procedural miniature.** Every planet, cannon, parcel and café is built in code: enamel clearcoat materials, AgX tone mapping, one key light and a hemisphere light.
+- **One physically based lighting model.** A CC0 studio HDRI, prefiltered to a PMREM, lights everything and is also the (blurred) backdrop. There is one key light with fitted, texel-snapped shadows. AgX is applied once in the output pass. GTAO grounds contact, bloom is limited to the two things that actually glow (each carries a real light), and SMAA smooths edges. Phones get a lighter tier. Materials are chipped enamel and powder-coat scans, glazed ceramic planets with a clearcoat, and brass orrery stands, so nothing floats.
 
 ## Run it locally
 
@@ -80,7 +80,22 @@ Code map: `src/game/` pure rules and state (tested) · `src/scene/` three.js min
 
 ## Credits
 
-All geometry, textures, graphics and README art are generated procedurally in code or hand-written SVG. Type uses the system font stack.
+Geometry, the planet glazes, the printed star chart and the README art are made in code or hand-written SVG. Type uses the system font stack. Every shipped asset is listed with its source URL, author, licence, retrieval date, processing and sha256 in [`assets.manifest.json`](assets.manifest.json).
+
+### Textures and lighting
+
+| Asset | Used for | Source | Author | Licence |
+| --- | --- | --- | --- | --- |
+| Painted Metal 004 | Postal-red enamel: depot drum, dock awning | https://ambientcg.com/view?id=PaintedMetal004 | ambientCG | CC0 |
+| Painted Metal 012 | Cream and teal enamel: café hut, dock pad | https://ambientcg.com/view?id=PaintedMetal012 | ambientCG | CC0 |
+| Metal 027 | Powder-coated steel: cannon barrel, stand feet, crate | https://ambientcg.com/view?id=Metal027 | ambientCG | CC0 |
+| Cardboard 001 | The battered parcel | https://ambientcg.com/view?id=Cardboard001 | ambientCG | CC0 |
+| Kitchen Wood | Chart-table frame | https://polyhaven.com/a/kitchen_wood | Poly Haven | CC0 |
+| Rough Linen | Weave of the star-chart sheet | https://polyhaven.com/a/rough_linen | Poly Haven | CC0 |
+| Rock Face 03 | Debris boulders | https://polyhaven.com/a/rock_face_03 | Poly Haven | CC0 |
+| Studio Small 09 (HDRI) | Image-based lighting and the blurred backdrop | https://polyhaven.com/a/studio_small_09 | Sergej Majboroda (Poly Haven) | CC0 |
+
+The Poly Haven wood, linen and rock sets were copied from ODD TIDE, another project in the collection, with their records carried over. All textures ship as 1K (rock 512 px) WebP, with roughness and metalness packed into one map.
 
 ### Audio
 
