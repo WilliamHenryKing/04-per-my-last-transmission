@@ -15,6 +15,7 @@ export class Burst {
   readonly group = new THREE.Group();
   private readonly scraps: Scrap[] = [];
   private life = 0;
+  private reducedMotion = false;
 
   constructor() {
     const geo = new THREE.BoxGeometry(0.07, 0.02, 0.06);
@@ -30,6 +31,7 @@ export class Burst {
   }
 
   fire(at: THREE.Vector3, reducedMotion: boolean) {
+    this.reducedMotion = reducedMotion;
     this.group.visible = true;
     this.life = 1;
     this.scraps.forEach((s, i) => {
@@ -38,8 +40,10 @@ export class Burst {
       s.mesh.position.copy(at);
       if (reducedMotion)
         s.mesh.position.add(new THREE.Vector3(Math.cos(a) * 0.2, 0, Math.sin(a) * 0.2));
-      s.vel.set(Math.cos(a) * speed, 0.6 + (i % 3) * 0.4, Math.sin(a) * speed);
-      s.spin.set(3 + (i % 4), 2 + (i % 3), 1);
+      s.mesh.rotation.set(0, 0, 0);
+      (s.mesh.material as THREE.MeshStandardMaterial).opacity = 1;
+      s.vel.set(Math.cos(a) * speed, reducedMotion ? 0 : 0.6 + (i % 3) * 0.4, Math.sin(a) * speed);
+      s.spin.set(reducedMotion ? 0 : 3 + (i % 4), reducedMotion ? 0 : 2 + (i % 3), 0);
     });
   }
 
@@ -51,11 +55,13 @@ export class Burst {
       return;
     }
     for (const s of this.scraps) {
-      s.mesh.position.addScaledVector(s.vel, dt);
-      s.vel.y -= 2.5 * dt;
-      s.vel.multiplyScalar(1 - dt * 1.5);
-      s.mesh.rotation.x += s.spin.x * dt;
-      s.mesh.rotation.z += s.spin.y * dt;
+      if (!this.reducedMotion) {
+        s.mesh.position.addScaledVector(s.vel, dt);
+        s.vel.y -= 2.5 * dt;
+        s.vel.multiplyScalar(1 - dt * 1.5);
+        s.mesh.rotation.x += s.spin.x * dt;
+        s.mesh.rotation.z += s.spin.y * dt;
+      }
       (s.mesh.material as THREE.MeshStandardMaterial).opacity = Math.min(1, this.life * 2);
     }
   }
@@ -63,5 +69,9 @@ export class Burst {
   clear() {
     this.group.visible = false;
     this.life = 0;
+  }
+
+  setReducedMotion(reduced: boolean) {
+    this.reducedMotion = reduced;
   }
 }

@@ -1,6 +1,7 @@
 import { createRoot } from "react-dom/client";
 import { AudioEngine } from "./audio/engine";
 import { hitsForCue } from "./audio/sounds";
+import { bindChartInput } from "./chartInput";
 import { predictBrake, predictFrom, predictLaunch } from "./game/predict";
 import { worldReady } from "./loader";
 import { whenLoaded } from "./scene/assets";
@@ -15,6 +16,7 @@ import "./ui/styles.css";
 // Wiring: one controller (rules + UI state), one three.js world, one frame loop.
 
 const motionQuery = window.matchMedia("(prefers-reduced-motion: reduce)");
+let renderedMotion = motionQuery.matches;
 const audio = new AudioEngine();
 const game = new Controller(audio);
 const session = game.session;
@@ -48,28 +50,32 @@ function aimFromPointer(e: PointerEvent) {
   });
 }
 
-canvas.addEventListener("pointerdown", (e) => {
-  if (session.phase !== "aim" || game.view !== "play" || game.opening !== "done") return;
-  canvas.setPointerCapture(e.pointerId);
-  aimFromPointer(e);
-});
-canvas.addEventListener("pointermove", (e) => {
-  if (canvas.hasPointerCapture(e.pointerId)) aimFromPointer(e);
-});
-canvas.addEventListener("pointerup", (e) => {
-  if (canvas.hasPointerCapture(e.pointerId)) canvas.releasePointerCapture(e.pointerId);
-});
+const input = bindChartInput(
+  canvas,
+  () => session.phase === "aim" && game.view === "play" && game.opening === "done",
+  aimFromPointer,
+);
+const syncInput = () => {
+  input.sync();
+  canvas.inert = game.opening !== "done" || game.view !== "play";
+};
+const unsubscribeInput = game.subscribe(syncInput);
+syncInput();
 
 // Browsers only allow sound after a gesture: the first press anywhere wakes the audio.
-for (const type of ["pointerdown", "keydown"] as const) {
-  window.addEventListener(type, () => audio.unlock(), { capture: true });
-}
+const unlock = () => audio.unlock();
+for (const type of ["pointerdown", "keydown"] as const)
+  window.addEventListener(type, unlock, { capture: true });
 
-window.addEventListener("resize", () => stage.resize());
+const resize = () => stage.resize();
+window.addEventListener("resize", resize);
 stage.resize();
 
 let prev = performance.now();
 let first = true;
+let disposed = false;
+let frameId = 0;
+let readyFrame = 0;
 let firstDrawn: () => void = () => {};
 const firstFrame = new Promise<void>((done) => {
   firstDrawn = done;
@@ -82,6 +88,9 @@ const visual: VisualHooks | null =
     : null;
 
 function frame(now: number) {
+  if (disposed) return;
+  // Some browsers update matches before delivering a media-query change event.
+  if (motionQuery.matches !== renderedMotion) render();
   // Clamp: a backwards timestamp must never rewind the world, a stall never leaps it.
   const frameMs = now - prev;
   const dt = visual?.frozen ? 0 : Math.max(0, Math.min(0.1, frameMs / 1000));
@@ -122,17 +131,18 @@ function frame(now: number) {
     course: session.phase === "flight" && f ? predictFrom(m, f, m.guideSeconds) : null,
     brakeGhost: session.phase === "flight" && f ? predictBrake(m, f) : null,
   });
-  opening.update(game, m, motionQuery.matches);
+  if (!document.documentElement.dataset.visualBookmark)
+    opening.update(game, m, motionQuery.matches);
   stage.render(frameMs);
   visual?.onFrame();
   if (first) {
     first = false;
     firstDrawn();
-    requestAnimationFrame(() => worldReady());
+    readyFrame = requestAnimationFrame(() => worldReady());
   }
-  requestAnimationFrame(frame);
+  frameId = requestAnimationFrame(frame);
 }
-requestAnimationFrame(frame);
+frameId = requestAnimationFrame(frame);
 
 // Read-only probe for the end-to-end test (only with ?e2e): frames can't hit exact ticks,
 // so the test reads the clock to time its key presses.
@@ -152,10 +162,33 @@ if (params.has("e2e")) {
   });
 }
 
-const root = document.getElementById("root");
-if (root) {
-  const app = createRoot(root);
-  const render = () => app.render(<App game={game} reducedMotion={motionQuery.matches} />);
-  motionQuery.addEventListener("change", render);
-  render();
-}
+const host = document.getElementById("root");
+const app = host ? createRoot(host) : null;
+const render = () => {
+  renderedMotion = motionQuery.matches;
+  game.setReducedMotion(motionQuery.matches);
+  world.setReducedMotion(motionQuery.matches);
+  app?.render(<App game={game} reducedMotion={motionQuery.matches} />);
+};
+motionQuery.addEventListener("change", render);
+render();
+
+if (import.meta.hot)
+  import.meta.hot.dispose(() => {
+    disposed = true;
+    cancelAnimationFrame(frameId);
+    cancelAnimationFrame(readyFrame);
+    firstDrawn();
+    app?.unmount();
+    unsubscribeInput();
+    input.dispose();
+    window.removeEventListener("resize", resize);
+    for (const type of ["pointerdown", "keydown"] as const)
+      window.removeEventListener(type, unlock, true);
+    motionQuery.removeEventListener("change", render);
+    visual?.dispose();
+    world.dispose();
+    stage.dispose();
+    audio.dispose();
+    canvas.remove();
+  });

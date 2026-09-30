@@ -7,9 +7,11 @@ import { Burst } from "./burst";
 import { type Dock, makeDepot, makeDock, makeParcel } from "./fixtures";
 import { Juice } from "./juice";
 import { Lamps } from "./lamps";
+import { sharedMaterials } from "./materials";
 import { PALETTE } from "./palette";
 import { DotPath, FadingLine, LinePath, makeCross, NearMiss } from "./paths";
 import { makeInfluence, makeOrbitRing, makePlanet, makeRock } from "./props";
+import { disposeTree } from "./resources";
 import type { Extents, Stage } from "./stage";
 
 export interface Frame {
@@ -53,10 +55,18 @@ export class World {
   private readonly burst = new Burst();
   private readonly v = new THREE.Vector3();
   private readonly juice: Juice;
+  private readonly owned = new Set<THREE.Object3D>();
+  private readonly endAt = new THREE.Vector3();
+  private endReady = false;
+  private disposed = false;
+  private reducedMotion = false;
+  private previousPhase: Session["phase"] | null = null;
+  private previousTime = 0;
 
   constructor(stage: Stage) {
     this.stage = stage;
     const s = stage.scene;
+    const existing = new Set(s.children);
     this.lamps = new Lamps(s);
     const beacon = this.lamps.beacon.bulb;
     this.parcels = { fragile: makeParcel("fragile", beacon), robust: makeParcel("robust", beacon) };
@@ -65,27 +75,28 @@ export class World {
     s.add(this.lastPath.line, this.guideMiss.group, this.lastMiss.group, this.guideEnd);
     s.add(this.lastBrake, this.burst.group, this.wake.line);
     this.juice = new Juice(s);
+    for (const object of s.children) if (!existing.has(object)) this.owned.add(object);
   }
 
   /** Session cues that deserve a physical flourish in the miniature. */
   react(cue: Cue, session: Session, reducedMotion: boolean) {
+    if (this.disposed) return;
+    this.setReducedMotion(reducedMotion);
+    if (cue === "launch") this.resetEffects();
+    if (cue === "end" && session.flight) {
+      this.endAt.set(session.flight.p.x, 0.05, -session.flight.p.y);
+      this.endReady = true;
+    }
     this.juice.react(cue, session, this.depot, this.stage, reducedMotion);
   }
 
   setMission(m: Mission) {
+    if (this.disposed) return;
     this.mission = m;
-    this.stage.scene.remove(this.missionGroup);
-    this.missionGroup.traverse((o) => {
-      if (o instanceof THREE.Mesh || o instanceof THREE.Sprite) {
-        o.geometry.dispose();
-        const mats = Array.isArray(o.material) ? o.material : [o.material];
-        for (const mat of mats) {
-          (mat as THREE.MeshBasicMaterial).map?.dispose();
-          mat.dispose();
-        }
-      }
-    });
+    this.owned.delete(this.missionGroup);
+    disposeTree(this.missionGroup, new Set([...sharedMaterials(), this.lamps.dock.bulb]));
     this.missionGroup = new THREE.Group();
+    this.owned.add(this.missionGroup);
     this.movers = [];
     m.bodies.forEach((b, i) => {
       const planet = makePlanet(b.look, b.radius, i * 3.1);
@@ -104,7 +115,7 @@ export class World {
     this.stage.scene.add(this.missionGroup);
     this.stage.fit(missionExtents(m));
     this.collectOverlays();
-    this.burst.clear();
+    this.resetEffects();
   }
 
   private addMover(object: THREE.Object3D, motion: Motion, spin: number) {
@@ -121,9 +132,15 @@ export class World {
 
   update(f: Frame) {
     const m = this.mission;
-    if (!m) return;
+    if (!m || this.disposed) return;
+    this.setReducedMotion(f.reducedMotion);
     const s = f.session;
     const t = s.time;
+    if (s.phase === "aim" && (this.previousPhase !== "aim" || t < this.previousTime)) {
+      this.resetEffects();
+    }
+    this.previousPhase = s.phase;
+    this.previousTime = t;
     for (const mv of this.movers) {
       const p = positionOf(m, mv.motion, t);
       mv.object.position.set(p.x, mv.object.position.y, -p.y);
@@ -218,8 +235,39 @@ export class World {
 
   /** Crash or rejection: scatter debris where the parcel ended. */
   shatter(reducedMotion: boolean) {
+    if (this.disposed) return;
     const p = this.parcels.fragile.visible ? this.parcels.fragile : this.parcels.robust;
-    this.burst.fire(p.position, reducedMotion);
+    this.burst.fire(this.endReady ? this.endAt : p.position, reducedMotion);
+  }
+
+  setReducedMotion(reduced: boolean) {
+    if (this.disposed || reduced === this.reducedMotion) return;
+    this.reducedMotion = reduced;
+    this.stage.setReducedMotion(reduced);
+    this.burst.setReducedMotion(reduced);
+    if (reduced) this.juice.reset();
+  }
+
+  private resetEffects() {
+    this.endReady = false;
+    this.burst.clear();
+    this.juice.reset();
+    this.stage.resetMotion();
+    for (const parcel of Object.values(this.parcels)) parcel.rotation.set(0, 0, 0);
+  }
+
+  dispose() {
+    if (this.disposed) return;
+    this.disposed = true;
+    this.juice.reset();
+    const root = new THREE.Group();
+    root.add(...this.owned);
+    disposeTree(root, new Set(sharedMaterials()));
+    this.owned.clear();
+    this.movers = [];
+    this.dock = null;
+    this.mission = null;
+    this.stage.aoHidden.length = 0;
   }
 }
 

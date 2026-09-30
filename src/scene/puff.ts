@@ -30,6 +30,11 @@ export class Puff {
     this.group.visible = true;
     this.life = 1;
     this.spread = reducedMotion ? 0.25 : 1;
+    this.material.opacity = 0.85;
+    for (const bead of this.beads) {
+      bead.position.set(0, 0, 0);
+      bead.scale.setScalar(0.6);
+    }
     this.dirs.forEach((d, i) => {
       const a = (i / COUNT) * Math.PI * 2;
       d.set(Math.cos(a), 0.15 + (i % 3) * 0.1, -Math.sin(a));
@@ -51,5 +56,10 @@ export class Puff {
       b.scale.setScalar(0.6 + (1 - this.life) * 1.4);
     });
     this.material.opacity = this.life * 0.85;
+  }
+
+  clear() {
+    this.group.visible = false;
+    this.life = 0;
   }
 }

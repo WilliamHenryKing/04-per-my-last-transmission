@@ -1,7 +1,10 @@
 import * as THREE from "three";
-import { loadEnvironment } from "./assets";
+import { disposeAssets, loadEnvironment } from "./assets";
+import { GAME_FOV, homeView } from "./framing";
+import { releaseMaterials, sharedMaterials } from "./materials";
 import { PALETTE } from "./palette";
 import { modestGpu, Pipeline, pickTier, type Tier } from "./pipeline";
+import { disposeTree } from "./resources";
 import { makeTable, TABLE_TOP } from "./table";
 
 // Renderer, camera, lights and the enamel table the miniature sits on.
@@ -36,6 +39,9 @@ export interface Stage {
   /** The governor's state, and one step down as a slow frame run would take (tests). */
   quality(): Record<string, unknown>;
   degrade(): boolean;
+  resetMotion(): void;
+  setReducedMotion(reduced: boolean): void;
+  dispose(): void;
 }
 
 export interface CameraShot {
@@ -45,10 +51,6 @@ export interface CameraShot {
   shiftX?: number;
   shiftY?: number;
 }
-
-const GAME_FOV = 34;
-
-const ELEVATION = THREE.MathUtils.degToRad(58);
 
 /** One key light: a warm studio softbox high to the left, shadowing the whole mission. */
 function makeKey(tier: Tier): THREE.DirectionalLight {
@@ -85,6 +87,8 @@ function patchFog() {
 const KEY_DIRECTION = new THREE.Vector3(-0.45, 1, 0.5).normalize();
 
 export function createStage(canvas: HTMLCanvasElement): Stage {
+  let disposed = false;
+  let reducedMotion = false;
   const tier = pickTier();
   // Antialiasing lives in the pipeline (MSAA target + SMAA), so the canvas itself has none.
   const renderer = new THREE.WebGLRenderer({
@@ -115,7 +119,7 @@ export function createStage(canvas: HTMLCanvasElement): Stage {
   scene.fog = new THREE.FogExp2(new THREE.Color(0.028, 0.03, 0.038), 0.009);
   scene.background = new THREE.Color(PALETTE.space);
   scene.add(makeTable());
-  loadEnvironment(renderer, scene);
+  const disposeEnvironment = loadEnvironment(renderer, scene);
 
   const key = makeKey(tier);
   scene.add(key, key.target);
@@ -160,6 +164,8 @@ export function createStage(canvas: HTMLCanvasElement): Stage {
 
   // The resting view plus a smoothed drift toward the action and a decaying shake.
   let shot: CameraShot | null = null;
+  let shiftX = 0;
+  let shiftY = 0;
 
   function aimCamera() {
     if (shot) {
@@ -176,47 +182,41 @@ export function createStage(canvas: HTMLCanvasElement): Stage {
     const h = canvas.clientHeight || 1;
     const aspect = w / h;
     camera.aspect = aspect;
-    const portrait = aspect < 0.9;
-    // Portrait screens look along the plane's long axis instead of across it.
-    const across = extents.maxX - extents.minX;
-    const deep = extents.maxY - extents.minY;
-    const screenW = portrait ? deep : across;
-    const screenH = (portrait ? across : deep) * Math.sin(ELEVATION);
-    const vfov = THREE.MathUtils.degToRad(GAME_FOV);
-    const hfov = 2 * Math.atan(Math.tan(vfov / 2) * aspect);
-    // Leave room for the HUD bands at the top and bottom of the screen.
-    const hudShare = portrait ? 0.62 : 0.74;
-    // Perspective enlarges the near edge, so allow a little extra room.
-    const dist =
-      1.14 *
-      Math.max(screenW / 2 / Math.tan(hfov / 2), screenH / 2 / (Math.tan(vfov / 2) * hudShare));
-    const cx = (extents.minX + extents.maxX) / 2;
-    const cz = -(extents.minY + extents.maxY) / 2;
-    const target = new THREE.Vector3(cx, -0.4, cz);
-    const back = new THREE.Vector3(portrait ? -1 : 0, 0, portrait ? 0 : 1).multiplyScalar(
-      Math.cos(ELEVATION) * dist,
-    );
-    baseTarget.copy(target);
-    basePosition
-      .copy(target)
-      .add(back)
-      .add(new THREE.Vector3(0, Math.sin(ELEVATION) * dist, 0));
+    const landscapeRail = w <= 720 && h <= 550 && w > h;
+    const measuredRail = landscapeRail
+      ? document.querySelector(".play-hud")?.getBoundingClientRect().width
+      : 0;
+    const rail = landscapeRail ? Math.min(w - 1, measuredRail || Math.min(320, w * 0.54)) : 0;
+    const home = homeView(extents, w, h, rail);
+    baseTarget.copy(home.target);
+    basePosition.copy(home.position);
     camera.fov = shot?.fov ?? GAME_FOV;
     aimCamera();
+    shiftX = home.shiftX ?? 0;
+    shiftY = home.shiftY ?? 0;
     // Nudge the view so the play area sits slightly above the control panel.
     if (shot) camera.setViewOffset(w, h, w * (shot.shiftX ?? 0), h * (shot.shiftY ?? 0), w, h);
-    else camera.setViewOffset(w, h, 0, portrait ? h * 0.07 : h * 0.03, w, h);
+    else {
+      camera.setViewOffset(w, h, w * shiftX, h * shiftY, w, h);
+    }
     camera.updateProjectionMatrix();
   }
 
+  let pendingResize = true;
   function resize() {
-    const w = canvas.clientWidth;
-    const h = canvas.clientHeight;
+    if (disposed) return;
+    pendingResize = true;
+    place();
+  }
+  function resizeBuffer() {
+    if (!pendingResize) return;
+    pendingResize = false;
+    const w = Math.max(1, canvas.clientWidth);
+    const h = Math.max(1, canvas.clientHeight);
     const ratio = pixelRatio(w, h);
     renderer.setPixelRatio(ratio);
     renderer.setSize(w, h, false);
     pipeline.setSize(w, h, ratio);
-    place();
   }
   pipeline.onScale = resize;
 
@@ -231,16 +231,20 @@ export function createStage(canvas: HTMLCanvasElement): Stage {
     tier,
     aoHidden,
     fit(next) {
+      if (disposed) return;
       extents = next;
       fitShadow();
       place();
     },
     resize,
     render(frameMs = 0) {
+      if (disposed) return;
       pipeline.adapt(frameMs);
+      resizeBuffer();
       pipeline.render();
     },
     setShot(next) {
+      if (disposed) return;
       shot = next;
       place();
     },
@@ -248,17 +252,19 @@ export function createStage(canvas: HTMLCanvasElement): Stage {
       position: basePosition.clone(),
       target: baseTarget.clone(),
       fov: GAME_FOV,
-      shiftX: 0,
-      shiftY: camera.aspect < 0.9 ? 0.07 : 0.03,
+      shiftX,
+      shiftY,
     }),
     quality: () => pipeline.state,
     degrade: () => pipeline.step(),
     nudge(strength, delay = 0) {
+      if (disposed || reducedMotion) return;
       shakeStrength = strength;
       shakeLeft = 0.28;
       shakeWait = delay;
     },
     follow(dt, focus) {
+      if (disposed) return;
       // Drift at most a fifth of the way toward the parcel: a hint of attention, not a chase.
       const goal = focus
         ? wanted.set((focus.x - baseTarget.x) * 0.2, 0, (-focus.y - baseTarget.z) * 0.2)
@@ -273,7 +279,10 @@ export function createStage(canvas: HTMLCanvasElement): Stage {
       aimCamera();
     },
     toGround(clientX, clientY) {
+      if (disposed) return null;
       const r = canvas.getBoundingClientRect();
+      if (r.width <= 0 || r.height <= 0) return null;
+      camera.updateMatrixWorld();
       const ndc = new THREE.Vector2(
         ((clientX - r.left) / r.width) * 2 - 1,
         -((clientY - r.top) / r.height) * 2 + 1,
@@ -281,6 +290,32 @@ export function createStage(canvas: HTMLCanvasElement): Stage {
       ray.setFromCamera(ndc, camera);
       if (!ray.ray.intersectPlane(ground, hit)) return null;
       return { x: hit.x, y: -hit.z };
+    },
+    resetMotion() {
+      drift.set(0, 0, 0);
+      shake.set(0, 0, 0);
+      shakeLeft = 0;
+      shakeWait = 0;
+      shakeStrength = 0;
+      aimCamera();
+    },
+    setReducedMotion(next) {
+      reducedMotion = next;
+      if (next) this.resetMotion();
+    },
+    dispose() {
+      if (disposed) return;
+      disposed = true;
+      pipeline.onScale = () => {};
+      disposeEnvironment();
+      scene.environment = null;
+      scene.background = null;
+      disposeTree(scene, new Set(sharedMaterials()));
+      releaseMaterials();
+      disposeAssets();
+      aoHidden.length = 0;
+      pipeline.dispose();
+      renderer.dispose();
     },
   };
 }

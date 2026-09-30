@@ -1,5 +1,6 @@
 import * as THREE from "three";
-import { type PbrId, pbrTiled } from "./assets";
+import { type PbrId, pbrTexture, pbrTiled } from "./assets";
+import { disposeMaterials } from "./resources";
 
 // Material roles for the miniature. Painted metal, powder-coat, cardboard and rock come from
 // CC0 scans (assets.manifest.json): their chips, scratches and rust are real, so edges wear
@@ -51,7 +52,7 @@ function build() {
       color: 0xd1a660,
       metalness: 1,
       roughness: 0.26,
-      normalMap: pbrTiled("metal027", 2).normal,
+      normalMap: pbrTexture("metal027", "normal", 2),
       normalScale: new THREE.Vector2(0.35, 0.35),
     }),
     /** Glazed ceramic: the depot dome. */
@@ -77,6 +78,15 @@ function build() {
 export function materials() {
   if (!cache) cache = build();
   return cache;
+}
+
+export function sharedMaterials(): THREE.Material[] {
+  return cache ? Object.values(cache) : [];
+}
+
+export function releaseMaterials() {
+  disposeMaterials(sharedMaterials());
+  cache = null;
 }
 
 /** A glowing element with the real light it casts. Luminance is scene-linear, above bloom. */

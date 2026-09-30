@@ -46,6 +46,12 @@ export class Juice {
     this.aimBarrel(depot, (angleDeg * Math.PI) / 180);
   }
 
+  reset() {
+    this.recoil = 0;
+    this.launchPuff.clear();
+    this.brakePuff.clear();
+  }
+
   /** The barrel kicks back along its own axis, then eases home. */
   private aimBarrel(depot: Depot, heading: number) {
     const kick = this.recoil * this.recoil * 0.18;

@@ -1,11 +1,14 @@
-import { useEffect, useSyncExternalStore } from "react";
+import { useCallback, useEffect, useLayoutEffect, useRef, useSyncExternalStore } from "react";
 import { Controls } from "./Controls";
 import type { Controller } from "./controller";
 import { Ending } from "./Ending";
+import { focusPlayControl } from "./focus";
 import { Hint } from "./Hint";
+import { commandForKey, keyTarget } from "./keyboard";
 import { MissionCard } from "./MissionCard";
 import { MissionList } from "./MissionList";
 import { ResultCard } from "./ResultCard";
+import { SoundButton } from "./SoundButton";
 import { Title } from "./Title";
 
 export interface AppProps {
@@ -13,124 +16,183 @@ export interface AppProps {
   reducedMotion: boolean;
 }
 
-function isTyping(target: EventTarget | null): boolean {
-  return target instanceof HTMLInputElement || target instanceof HTMLTextAreaElement;
-}
-
 export function App({ game, reducedMotion }: AppProps) {
   useSyncExternalStore(game.subscribe, game.getVersion);
   const s = game.session;
+  const hudRef = useRef<HTMLDivElement>(null);
+  const focusFrame = useRef(0);
+  const scheduleFocus = useCallback(() => {
+    cancelAnimationFrame(focusFrame.current);
+    focusFrame.current = requestAnimationFrame(() => {
+      focusFrame.current = 0;
+      if (game.view === "play" && game.opening === "done") focusPlayControl();
+    });
+  }, [game]);
+  useEffect(() => () => cancelAnimationFrame(focusFrame.current), []);
+
+  useLayoutEffect(() => {
+    if (game.opening !== "done") return;
+    const hud = hudRef.current;
+    const mission = hud?.querySelector(".mission-card");
+    if (!hud || !mission) return;
+    const place = () =>
+      hud.style.setProperty("--guide-top", `${mission.getBoundingClientRect().bottom + 12}px`);
+    place();
+    const observer = new ResizeObserver(place);
+    observer.observe(mission);
+    window.addEventListener("resize", place);
+    return () => {
+      observer.disconnect();
+      window.removeEventListener("resize", place);
+    };
+  }, [game.opening]);
 
   useEffect(() => {
-    const onKey = (e: KeyboardEvent) => {
-      if (e.metaKey || e.ctrlKey || e.altKey) return;
-      if (game.opening !== "done") {
-        if (e.key === "Enter" && !e.repeat) {
-          e.preventDefault();
+    const onKey = (event: KeyboardEvent) => {
+      const target = keyTarget(event.target);
+      // Native buttons also repeat Enter. Prevent its default activation after launch.
+      if (
+        !event.defaultPrevented &&
+        !event.ctrlKey &&
+        !event.metaKey &&
+        !event.altKey &&
+        target !== "text" &&
+        target !== "scroll" &&
+        event.repeat &&
+        (event.key === " " || event.key === "Enter")
+      ) {
+        event.preventDefault();
+        return;
+      }
+      const command = commandForKey(
+        {
+          key: event.key,
+          target,
+          repeat: event.repeat,
+          shiftKey: event.shiftKey,
+          ctrlKey: event.ctrlKey,
+          metaKey: event.metaKey,
+          altKey: event.altKey,
+          defaultPrevented: event.defaultPrevented,
+        },
+        game.opening,
+        game.view,
+      );
+      if (!command) return;
+      event.preventDefault();
+      switch (command.type) {
+        case "begin":
           game.begin(reducedMotion);
-        }
-        return;
+          break;
+        case "mute":
+          game.toggleMute();
+          break;
+        case "close":
+          game.closePanel();
+          break;
+        case "aim":
+          game.nudgeAim(command.angle, command.power);
+          break;
+        case "brake":
+          game.brake();
+          break;
+        case "retry":
+          game.retry();
+          break;
+        case "next":
+          game.next();
+          break;
+        case "missions":
+          game.openMissions();
+          break;
+        case "primary":
+          if (game.session.phase !== "result") game.primary();
+          else if (game.session.outcome?.verdict === "delivered") game.next();
+          else game.retry();
       }
-      if (e.key.toLowerCase() === "m" && !isTyping(e.target)) {
-        game.toggleMute();
-        e.preventDefault();
-        return;
-      }
-      if (game.view !== "play") {
-        if (e.key === "Escape" || e.key.toLowerCase() === "l") game.closePanel();
-        return;
-      }
-      const onButton = e.target instanceof HTMLButtonElement;
-      const onSlider = isTyping(e.target);
-      const step = e.shiftKey ? 5 : 1;
-      const key = e.key.toLowerCase();
-      if (!onSlider && (key === "arrowleft" || key === "a")) game.nudgeAim(step, 0);
-      else if (!onSlider && (key === "arrowright" || key === "d")) game.nudgeAim(-step, 0);
-      else if (!onSlider && (key === "arrowup" || key === "w")) game.nudgeAim(0, step);
-      else if (!onSlider && (key === "arrowdown" || key === "s")) game.nudgeAim(0, -step);
-      else if ((key === " " || key === "enter") && !onButton) {
-        const done = game.session.phase === "result";
-        if (done && game.session.outcome?.verdict === "delivered") game.next();
-        else if (done) game.retry();
-        else game.primary();
-      } else if (key === "b") game.brake();
-      else if (key === "r") game.retry();
-      else if (key === "n") game.next();
-      else if (key === "l") game.openMissions();
-      else return;
-      e.preventDefault();
     };
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
   }, [game, reducedMotion]);
 
+  useEffect(() => {
+    if (game.opening === "done" && s.phase === "aim") scheduleFocus();
+  }, [game.opening, s.phase, scheduleFocus]);
+
+  const dismissGuide = () => {
+    game.dismissHint();
+    scheduleFocus();
+  };
+
   if (game.opening !== "done")
     return game.opening === "title" ? <Title onBegin={() => game.begin(reducedMotion)} /> : null;
 
   return (
-    <div className="pointer-events-none fixed inset-0 flex flex-col justify-between gap-3 p-3 sm:p-5">
-      {/* Phones stack the title card above one compact row; wider screens sit them side by side. */}
-      <header className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between sm:gap-3">
-        <MissionCard game={game} />
-        <div className="pointer-events-auto flex items-center justify-end gap-2 sm:flex-col sm:items-end">
-          <div
-            className="plate mr-auto px-3 py-1.5 text-left font-mono text-sm tabular-nums sm:mr-0 sm:py-2 sm:text-right"
-            role="timer"
-            aria-label="Mission clock"
-          >
-            <span className="label mr-2 text-[10px] opacity-70 sm:mr-0 sm:block">Clock</span>T+
-            {s.time.toFixed(1).padStart(4, "0")}s
+    <>
+      <div ref={hudRef} className="play-hud" inert={game.view !== "play"}>
+        <header className="hud-header">
+          <MissionCard game={game} />
+          <div className="hud-tools">
+            <div
+              className="plate mission-clock px-3 py-1.5 font-mono text-sm tabular-nums"
+              role="timer"
+              aria-label="Mission clock"
+            >
+              <span className="label mr-2 text-[10px] opacity-70">Clock</span>T+
+              {s.time.toFixed(1).padStart(4, "0")}s
+            </div>
+            <nav className="hud-buttons" aria-label="Mission tools">
+              <button
+                type="button"
+                className="btn"
+                aria-label="Replay the guide"
+                disabled={s.phase === "result"}
+                title={s.phase === "result" ? "Retry to replay the guide" : "Replay the guide"}
+                onClick={() => game.replayGuide()}
+              >
+                ?
+              </button>
+              <SoundButton game={game} />
+              <button
+                type="button"
+                className="btn px-3 py-2 text-xs"
+                aria-keyshortcuts="L"
+                onClick={() => game.openMissions()}
+              >
+                Missions<span className="kbd max-sm:hidden">L</span>
+              </button>
+            </nav>
           </div>
-          <div className="flex gap-2">
-            <button
-              type="button"
-              className="btn"
-              aria-label="Replay the guide"
-              onClick={() => game.replayGuide()}
-            >
-              ?
-            </button>
-            <button
-              type="button"
-              className="btn min-h-11 px-3 py-2 text-xs sm:py-3"
-              onClick={() => game.toggleMute()}
-              aria-pressed={game.muted}
-              aria-label={game.muted ? "Sound off. Turn sound on (M)" : "Sound on. Mute (M)"}
-            >
-              {game.muted ? "Sound off" : "Sound on"}
-              <span className="kbd max-sm:hidden">M</span>
-            </button>
-            <button
-              type="button"
-              className="btn min-h-11 px-3 py-2 text-xs sm:px-4 sm:py-3"
-              onClick={() => game.openMissions()}
-            >
-              Missions<span className="kbd max-sm:hidden">L</span>
-            </button>
-          </div>
-        </div>
-      </header>
-
-      <div className="flex flex-1 items-start justify-center" aria-live="polite">
-        {game.toast && (
-          <p key={game.toast.id} className="toast plate label px-4 py-2 text-xs">
-            {game.toast.text}
+        </header>
+        <div className="hud-status" role="status" aria-live="polite">
+          {game.toast && (
+            <p key={game.toast.id} className="toast plate label px-4 py-2 text-xs">
+              {game.toast.text}
+            </p>
+          )}
+          <p className="sr-only">
+            {s.phase === "flight"
+              ? s.flight?.braked
+                ? "Brake applied."
+                : "Parcel in flight. One brake available."
+              : ""}
           </p>
-        )}
+        </div>
+        <footer className="hud-footer">
+          {s.phase === "result" ? (
+            <ResultCard game={game} reducedMotion={reducedMotion} />
+          ) : (
+            <>
+              {game.hintOpen && <Hint step={game.guideStep} onDismiss={dismissGuide} />}
+              <Controls game={game} />
+            </>
+          )}
+        </footer>
       </div>
-
-      <footer className="flex flex-col items-center gap-3">
-        {s.phase === "result" && game.view === "play" && (
-          <ResultCard game={game} reducedMotion={reducedMotion} />
-        )}
-        {game.hintOpen && game.view === "play" && (
-          <Hint step={game.guideStep} onDismiss={() => game.dismissHint()} />
-        )}
-        <Controls game={game} />
-      </footer>
-
-      {game.view === "missions" && <MissionList game={game} />}
-      {game.view === "ending" && <Ending game={game} reducedMotion={reducedMotion} />}
-    </div>
+      {game.view === "missions" && <MissionList game={game} onPlayFocus={scheduleFocus} />}
+      {game.view === "ending" && (
+        <Ending game={game} reducedMotion={reducedMotion} onPlayFocus={scheduleFocus} />
+      )}
+    </>
   );
 }

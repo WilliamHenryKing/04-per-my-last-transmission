@@ -9,8 +9,10 @@ export function MissionCard({ game }: { game: Controller }) {
   const last = s.phase === "aim" ? s.last : null;
   return (
     <section
-      className="plate pointer-events-auto w-full px-3 py-2 sm:w-auto sm:max-w-[min(440px,62vw)] sm:px-4 sm:py-3"
+      className="plate mission-card keyboard-scroll pointer-events-auto w-full px-3 py-2 sm:w-auto sm:max-w-[min(440px,62vw)] sm:px-4 sm:py-3"
       aria-label="Mission"
+      // biome-ignore lint/a11y/noNoninteractiveTabindex: The bounded mission summary must support keyboard scrolling.
+      tabIndex={0}
     >
       <p className="label text-post">
         Mission {s.index + 1} / {MISSIONS.length}

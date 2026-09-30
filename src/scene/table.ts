@@ -1,5 +1,5 @@
 import * as THREE from "three";
-import { pbrTiled } from "./assets";
+import { pbrTexture, pbrTiled } from "./assets";
 import { makeChartAlbedo } from "./tableArt";
 
 // The chart table: an oiled kitchen-wood frame (Poly Haven, CC0), a linen sheet stretched
@@ -29,7 +29,10 @@ export function makeTable(): THREE.Group {
   frame.castShadow = true;
   group.add(frame);
 
-  const linen = pbrTiled("rough_linen", 9);
+  const linen = {
+    normal: pbrTexture("rough_linen", "normal", 9),
+    arm: pbrTexture("rough_linen", "arm", 9),
+  };
   const sheet = new THREE.Mesh(
     new THREE.PlaneGeometry(W, D),
     new THREE.MeshStandardMaterial({

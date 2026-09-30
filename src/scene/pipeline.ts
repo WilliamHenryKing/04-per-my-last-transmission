@@ -211,4 +211,15 @@ export class Pipeline {
   render() {
     this.composer.render();
   }
+
+  dispose() {
+    this.adaptive = false;
+    this.onScale = () => {};
+    // These shader materials are omitted by the pinned Three.js pass disposers.
+    this.ao?.gtaoMaterial.dispose();
+    this.ao?.blendMaterial.dispose();
+    this.bloom.materialHighPassFilter.dispose();
+    for (const pass of this.composer.passes) pass.dispose();
+    this.composer.dispose();
+  }
 }

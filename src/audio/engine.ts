@@ -47,20 +47,27 @@ export class AudioEngine {
   private mood: AudioMood = "aim";
   private lastTick = 0;
   private hidden = false;
+  private disposed = false;
+  private readonly abort = new AbortController();
+  private readonly sources = new Map<AudioBufferSourceNode, GainNode | null>();
+  private readonly pending = new Map<AudioBufferSourceNode, number>();
+  private readonly onVisibility = () => {
+    this.hidden = document.hidden;
+    if (!this.ctx || this.disposed) return;
+    const change = this.hidden ? this.ctx.suspend() : this.ctx.resume();
+    void change.catch(() => {});
+  };
 
   constructor() {
-    document.addEventListener("visibilitychange", () => {
-      this.hidden = document.hidden;
-      if (!this.ctx) return;
-      if (this.hidden) void this.ctx.suspend();
-      else void this.ctx.resume();
-    });
+    this.hidden = document.hidden;
+    document.addEventListener("visibilitychange", this.onVisibility);
   }
 
   /** Call from a user gesture: creates the context and loads everything once. */
   unlock() {
+    if (this.disposed) return;
     if (this.ctx) {
-      if (this.ctx.state === "suspended" && !this.hidden) void this.ctx.resume();
+      if (this.ctx.state === "suspended" && !this.hidden) void this.ctx.resume().catch(() => {});
       return;
     }
     const Ctor = window.AudioContext;
@@ -85,9 +92,13 @@ export class AudioEngine {
       (a, b) => Number(!!SOUNDS[a].loop) - Number(!!SOUNDS[b].loop),
     );
     for (const id of order) {
+      if (this.disposed || this.ctx !== ctx) return;
       try {
-        const res = await fetch(soundUrl(id));
-        const buffer = await ctx.decodeAudioData(await res.arrayBuffer());
+        const res = await fetch(soundUrl(id), { signal: this.abort.signal });
+        const bytes = await res.arrayBuffer();
+        if (this.disposed || this.ctx !== ctx) return;
+        const buffer = await ctx.decodeAudioData(bytes);
+        if (this.disposed || this.ctx !== ctx) return;
         this.buffers.set(id, buffer);
       } catch {
         // A missing or undecodable file only silences that one sound.
@@ -98,7 +109,7 @@ export class AudioEngine {
   }
 
   private startBeds() {
-    if (this.beds || !this.ctx) return;
+    if (this.disposed || this.beds || !this.ctx) return;
     this.beds = true;
     for (const id of ["music-hold", "ambience-space"] as SoundId[]) {
       const buffer = this.buffers.get(id);
@@ -111,11 +122,13 @@ export class AudioEngine {
       src.loopStart = span.start;
       src.loopEnd = span.end;
       src.connect(bus);
+      this.own(src);
       src.start(0, span.start);
     }
   }
 
   play(id: SoundId, delay = 0, rate = 1) {
+    if (this.disposed) return;
     const ctx = this.ctx;
     const buffer = this.buffers.get(id);
     const bus = this.buses.get(SOUNDS[id].bus);
@@ -138,12 +151,15 @@ export class AudioEngine {
       gain.gain.linearRampToValueAtTime(0, at + length);
     }
     src.connect(gain).connect(bus);
+    this.own(src, gain);
+    if (delay > 0) this.pending.set(src, at);
     src.start(at);
     if (length) src.stop(at + length + 0.05);
   }
 
   /** Fade the beds to suit what the player is doing; the flight hum only plays in flight. */
   setMood(mood: AudioMood, force = false) {
+    if (this.disposed) return;
     if (mood === this.mood && !force) return;
     this.mood = mood;
     const ctx = this.ctx;
@@ -161,6 +177,7 @@ export class AudioEngine {
   }
 
   setSpeed(speed: number) {
+    if (this.disposed) return;
     if (this.hum && this.ctx) {
       this.hum.source.playbackRate.setTargetAtTime(humRate(speed), this.ctx.currentTime, 0.1);
     }
@@ -170,7 +187,7 @@ export class AudioEngine {
     const ctx = this.ctx;
     const buffer = this.buffers.get("flight-hum");
     const bus = this.buses.get("sfx");
-    if (this.hum || !ctx || !buffer || !bus) return;
+    if (this.disposed || this.hum || !ctx || !buffer || !bus) return;
     const source = ctx.createBufferSource();
     source.buffer = buffer;
     source.loop = true;
@@ -181,6 +198,7 @@ export class AudioEngine {
     gain.gain.setValueAtTime(0, ctx.currentTime);
     gain.gain.linearRampToValueAtTime(SOUNDS["flight-hum"].gain, ctx.currentTime + 0.3);
     source.connect(gain).connect(bus);
+    this.own(source, gain);
     source.start(0, span.start);
     this.hum = { source, gain };
   }
@@ -197,6 +215,7 @@ export class AudioEngine {
   }
 
   setMuted(muted: boolean) {
+    if (this.disposed) return;
     this.muted = muted;
     try {
       window.localStorage.setItem(MUTE_KEY, muted ? "1" : "0");
@@ -209,5 +228,60 @@ export class AudioEngine {
     g.cancelScheduledValues(ctx.currentTime);
     g.setValueAtTime(g.value, ctx.currentTime);
     g.linearRampToValueAtTime(muted ? 0 : 0.9, ctx.currentTime + 0.12);
+  }
+
+  private own(source: AudioBufferSourceNode, gain: GainNode | null = null) {
+    this.sources.set(source, gain);
+    source.onended = () => {
+      this.sources.delete(source);
+      this.pending.delete(source);
+      source.disconnect();
+      gain?.disconnect();
+      source.onended = null;
+    };
+  }
+
+  /** A new attempt cannot inherit a stamp/jingle that has not started yet. */
+  cancelPending() {
+    if (!this.ctx || this.disposed) return;
+    for (const [source, at] of this.pending) {
+      if (at > this.ctx.currentTime) {
+        const gain = this.sources.get(source);
+        this.sources.delete(source);
+        source.onended = null;
+        source.stop();
+        source.disconnect();
+        gain?.disconnect();
+      }
+    }
+    this.pending.clear();
+  }
+
+  dispose() {
+    if (this.disposed) return;
+    this.disposed = true;
+    this.abort.abort();
+    document.removeEventListener("visibilitychange", this.onVisibility);
+    for (const [source, gain] of this.sources) {
+      source.onended = null;
+      try {
+        source.stop();
+      } catch {
+        /* Already-ended sounds need no stop. */
+      }
+      source.disconnect();
+      gain?.disconnect();
+    }
+    this.sources.clear();
+    this.pending.clear();
+    this.hum = null;
+    for (const bus of this.buses.values()) bus.disconnect();
+    this.buses.clear();
+    this.buffers.clear();
+    this.master?.disconnect();
+    this.master = null;
+    const ctx = this.ctx;
+    this.ctx = null;
+    if (ctx) void ctx.close().catch(() => {});
   }
 }

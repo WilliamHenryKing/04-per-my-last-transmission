@@ -20,9 +20,11 @@ const STEPS = [
 export function Hint({ step, onDismiss }: { step: number; onDismiss: () => void }) {
   return (
     <aside
-      className="plate guide-card pointer-events-auto max-w-[560px] px-3 py-2 text-xs sm:text-sm"
+      className="plate guide-card keyboard-scroll pointer-events-auto max-w-[560px] px-3 py-2 text-xs sm:text-sm"
       aria-label="How to deliver"
       aria-live="polite"
+      // biome-ignore lint/a11y/noNoninteractiveTabindex: Short-screen guidance must support native keyboard scrolling.
+      tabIndex={0}
     >
       <p>
         <strong className="label text-post">
@@ -33,7 +35,7 @@ export function Hint({ step, onDismiss }: { step: number; onDismiss: () => void 
       </p>
       <div className="mt-2 flex items-center justify-between">
         <span aria-hidden="true">{STEPS.map((_, i) => (i === step ? "● " : "○ "))}</span>
-        <button type="button" className="underline min-h-8" onClick={onDismiss}>
+        <button type="button" className="underline min-h-11 px-2" onClick={onDismiss}>
           Skip the guide
         </button>
       </div>

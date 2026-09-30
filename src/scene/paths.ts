@@ -28,11 +28,20 @@ export class DotPath {
   /** `every` samples per dot; `major` dots per enlarged dot. */
   set(points: Vec[], every: number, major: number) {
     let n = 0;
+    let last = 0;
     for (let i = every, k = 1; i < points.length && n < this.max; i += every, k++) {
       const p = points[i] as Vec;
       const s = k % major === 0 ? 1.8 : 1;
       tmp.position.set(p.x, PLANE_Y, -p.y);
       tmp.scale.setScalar(s);
+      tmp.updateMatrix();
+      this.mesh.setMatrixAt(n++, tmp.matrix);
+      last = i;
+    }
+    if (points.length > 1 && last !== points.length - 1 && n < this.max) {
+      const end = points[points.length - 1] as Vec;
+      tmp.position.set(end.x, PLANE_Y, -end.y);
+      tmp.scale.setScalar(1);
       tmp.updateMatrix();
       this.mesh.setMatrixAt(n++, tmp.matrix);
     }
@@ -51,11 +60,14 @@ export class LinePath {
   private readonly geo = new THREE.BufferGeometry();
   private readonly buffer: Float32Array;
   private readonly dashed: boolean;
+  private readonly distances: Float32Array;
 
   constructor(color: number, opacity: number, dashed = false, max = 4000) {
     this.buffer = new Float32Array(max * 3);
+    this.distances = new Float32Array(max);
     this.geo.setAttribute("position", new THREE.BufferAttribute(this.buffer, 3));
     this.dashed = dashed;
+    if (dashed) this.geo.setAttribute("lineDistance", new THREE.BufferAttribute(this.distances, 1));
     const material = dashed
       ? new THREE.LineDashedMaterial({
           color,
@@ -77,10 +89,16 @@ export class LinePath {
       this.buffer[i * 3] = p.x;
       this.buffer[i * 3 + 1] = PLANE_Y;
       this.buffer[i * 3 + 2] = -p.y;
+      if (this.dashed) {
+        const previous = points[i - 1];
+        this.distances[i] = previous
+          ? (this.distances[i - 1] ?? 0) + Math.hypot(p.x - previous.x, p.y - previous.y)
+          : 0;
+      }
     }
     this.geo.setDrawRange(0, n);
     (this.geo.getAttribute("position") as THREE.BufferAttribute).needsUpdate = true;
-    if (this.dashed && n > 1) this.line.computeLineDistances();
+    if (this.dashed) this.geo.getAttribute("lineDistance").needsUpdate = true;
     this.line.visible = n > 1;
   }
 

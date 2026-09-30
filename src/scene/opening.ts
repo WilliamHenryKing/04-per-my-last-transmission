@@ -20,6 +20,7 @@ export class Opening {
     if (game.opening === "done") {
       if (this.active) this.stage.setShot(null);
       this.active = false;
+      this.departure = null;
       return;
     }
     this.active = true;
@@ -44,12 +45,12 @@ export class Opening {
     } else {
       this.departure ??= this.last ?? home;
       const from = this.departure;
-      const t = ease(game.openingClock / 2.8);
+      const t = reduced ? 1 : ease(game.openingClock / 2.8);
       shot = {
         position: from.position.clone().lerp(home.position, t),
         target: from.target.clone().lerp(home.target, t),
         fov: THREE.MathUtils.lerp(from.fov, home.fov, t),
-        shiftX: THREE.MathUtils.lerp(from.shiftX ?? 0, 0, t),
+        shiftX: THREE.MathUtils.lerp(from.shiftX ?? 0, home.shiftX ?? 0, t),
         shiftY: THREE.MathUtils.lerp(from.shiftY ?? 0, home.shiftY ?? 0, t),
       };
       shot.position.y += Math.sin(Math.PI * t) * 0.65;

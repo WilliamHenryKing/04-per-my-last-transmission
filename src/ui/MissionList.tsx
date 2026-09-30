@@ -1,18 +1,23 @@
 import { MISSIONS } from "../game/missions";
 import type { Controller } from "./controller";
+import { trapPanelTab, usePanelFocus } from "./focus";
+import { SoundButton } from "./SoundButton";
 import { StampRow } from "./StampRow";
-import { useFocusOnMount } from "./useFocusOnMount";
 
-export function MissionList({ game }: { game: Controller }) {
-  const focusRef = useFocusOnMount<HTMLButtonElement>();
+export function MissionList({ game, onPlayFocus }: { game: Controller; onPlayFocus: () => void }) {
+  const focusRef = usePanelFocus(true);
   const p = game.progress;
   return (
-    <div className="pointer-events-auto fixed inset-0 grid place-items-center bg-night/70 p-3">
+    <div className="modal-backdrop pointer-events-auto fixed inset-0 grid place-items-center bg-night/70 p-3">
       <div
-        className="plate max-h-[90vh] w-full max-w-[520px] overflow-y-auto px-4 py-4"
+        ref={focusRef}
+        className="plate dialog-panel keyboard-scroll w-full max-w-[520px] px-4 py-4"
         role="dialog"
         aria-modal="true"
         aria-labelledby="missions-title"
+        aria-describedby="manifest-key"
+        tabIndex={-1}
+        onKeyDown={(event) => trapPanelTab(event, focusRef.current)}
       >
         <div className="flex items-center justify-between">
           <h2 id="missions-title" className="text-lg font-extrabold">
@@ -22,7 +27,7 @@ export function MissionList({ game }: { game: Controller }) {
             type="button"
             className="btn px-3 py-2 text-xs"
             onClick={() => game.closePanel()}
-            ref={focusRef}
+            aria-keyshortcuts="Escape L"
           >
             Close<span className="kbd">Esc</span>
           </button>
@@ -37,7 +42,10 @@ export function MissionList({ game }: { game: Controller }) {
                   type="button"
                   className="btn flex w-full items-center justify-between gap-2 text-left normal-case"
                   disabled={locked}
-                  onClick={() => game.select(i)}
+                  onClick={() => {
+                    game.select(i);
+                    onPlayFocus();
+                  }}
                   aria-label={`${i + 1}. ${locked ? "Locked" : m.title}, ${best?.stamps.length ?? 0} of 3 stamps`}
                 >
                   <span className="tracking-normal">
@@ -52,9 +60,12 @@ export function MissionList({ game }: { game: Controller }) {
             );
           })}
         </ol>
-        <p className="label mt-3 text-[10px] opacity-70">
+        <p id="manifest-key" className="label mt-3 text-[10px] opacity-70">
           Stamps: D delivered · G gentle (contents intact) · F frugal (fuel under par)
         </p>
+        <div className="mt-3 flex justify-end">
+          <SoundButton game={game} />
+        </div>
       </div>
     </div>
   );

@@ -5,11 +5,20 @@ import { MISSIONS } from "../game/missions";
 import { totalStamps } from "../game/progress";
 import { ALL_STAMPS } from "../game/rules";
 import type { Controller } from "./controller";
+import { trapPanelTab, usePanelFocus } from "./focus";
+import { SoundButton } from "./SoundButton";
 import { StampRow } from "./StampRow";
-import { useFocusOnMount } from "./useFocusOnMount";
 
-export function Ending({ game, reducedMotion }: { game: Controller; reducedMotion: boolean }) {
-  const focusRef = useFocusOnMount<HTMLButtonElement>();
+export function Ending({
+  game,
+  reducedMotion,
+  onPlayFocus,
+}: {
+  game: Controller;
+  reducedMotion: boolean;
+  onPlayFocus: () => void;
+}) {
+  const focusRef = usePanelFocus(true);
   const root = useRef<HTMLDivElement>(null);
   const stamps = totalStamps(game.progress);
   const max = MISSIONS.length * ALL_STAMPS.length;
@@ -27,25 +36,29 @@ export function Ending({ game, reducedMotion }: { game: Controller; reducedMotio
         ease: "back.out(2)",
       });
     },
-    { scope: root },
+    { scope: root, dependencies: [reducedMotion], revertOnUpdate: true },
   );
 
   return (
     <div
       ref={root}
-      className="pointer-events-auto fixed inset-0 grid place-items-center bg-night/80 p-3"
+      className="modal-backdrop pointer-events-auto fixed inset-0 grid place-items-center bg-night/80 p-3"
     >
       <div
-        className="memo plate max-h-[92vh] w-full max-w-[520px] overflow-y-auto px-5 py-5"
+        ref={focusRef}
+        className="memo plate dialog-panel keyboard-scroll w-full max-w-[520px] px-5 py-5"
         role="dialog"
         aria-modal="true"
         aria-labelledby="ending-title"
+        aria-describedby="ending-copy"
+        tabIndex={-1}
+        onKeyDown={(event) => trapPanelTab(event, focusRef.current)}
       >
         <p className="label text-post">Internal memo · Re: your performance</p>
         <h2 id="ending-title" className="mt-1 text-xl font-extrabold">
           Per my last transmission
         </h2>
-        <div className="mt-3 space-y-2 text-sm">
+        <div id="ending-copy" className="mt-3 space-y-2 text-sm">
           <p>
             All eight parcels have been delivered. Head Office has received its own complaint about
             late deliveries, and has filed it.
@@ -79,14 +92,25 @@ export function Ending({ game, reducedMotion }: { game: Controller; reducedMotio
           Every missing stamp is a gentler or cheaper route still waiting in the manifest.
         </p>
         <div className="mt-4 flex flex-wrap justify-end gap-2">
+          <SoundButton game={game} />
+          <button
+            type="button"
+            className="btn"
+            onClick={() => game.closePanel()}
+            aria-keyshortcuts="Escape"
+          >
+            Close report
+          </button>
           <button type="button" className="btn" onClick={() => game.openMissions()}>
             Manifest
           </button>
           <button
             type="button"
             className="btn btn-post"
-            onClick={() => game.select(0)}
-            ref={focusRef}
+            onClick={() => {
+              game.select(0);
+              onPlayFocus();
+            }}
           >
             Start the round again
           </button>

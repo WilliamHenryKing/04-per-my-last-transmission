@@ -63,7 +63,7 @@ Three.js 0.186 (no React Three Fiber) · TypeScript (strict) · React 19 for the
 
 - **Deterministic orbital flight.** Planets, moons and docks ride analytic orbits. The parcel is integrated at a fixed 120 Hz step, and the world clock counts whole ticks, so the same inputs always produce the same flight. Retry restarts the clock, which makes every attempt reproducible.
 - **Honest path prediction.** The guide, the brake ghost and the real flight all call the same `step()` function. A unit test asserts that the prediction matches the flight to the bit.
-- **Solver-verified missions.** `scripts/solve.ts` grid-searches launch timing, angle, power and brake moment for each mission. Every mission ships with a reference route that the tests fly, and an end-to-end Playwright test delivers mission 1 through the real UI.
+- **Solver-verified missions.** `scripts/solve.ts` grid-searches launch timing, angle, power and brake moment for each mission. Every mission ships with a reference route that the tests fly, and the Playwright suite delivers all eight through the real controls, then checks the ending and replay. Phone layouts, live motion preferences and input edge cases have separate browser coverage.
 - **One physically based lighting model.** A CC0 studio HDRI, prefiltered to a PMREM, lights everything and is also the (blurred) backdrop. There is one key light with fitted, texel-snapped shadows. AgX is applied once in the output pass. GTAO grounds contact, bloom is limited to the two things that actually glow (each carries a real light), and SMAA smooths edges. Phones get a lighter tier. Materials are chipped enamel and powder-coat scans, glazed ceramic planets with a clearcoat, and brass orrery stands, so nothing floats.
 
 ## Run it locally

@@ -82,6 +82,7 @@ export class Session {
     this.trail = [];
     this.brakeAt = null;
     this.outcome = null;
+    this.cues = [];
     this.version++;
   }
 

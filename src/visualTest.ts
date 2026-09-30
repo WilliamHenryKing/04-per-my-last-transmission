@@ -16,6 +16,7 @@ export interface VisualHooks {
   takeDt(): number;
   /** Called by the frame loop after each render. */
   onFrame(): void;
+  dispose(): void;
 }
 
 export function installVisualTest(
@@ -43,6 +44,11 @@ export function installVisualTest(
           w.done();
         }
       }
+    },
+    dispose() {
+      for (const waiter of waiters.splice(0)) waiter.done();
+      const target = window as unknown as { __VISUAL_TEST__?: unknown };
+      if (target.__VISUAL_TEST__ === api) delete target.__VISUAL_TEST__;
     },
   };
   const api = {

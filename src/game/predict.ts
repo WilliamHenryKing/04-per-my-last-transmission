@@ -23,7 +23,7 @@ export function predictFrom(m: Mission, flight: Flight, seconds: number): Predic
       points.push({ ...f.p });
       return { points, end: e, endAt: { ...f.p }, closest: f.closest };
     }
-    if (f.step % SAMPLE_EVERY === 0) points.push({ ...f.p });
+    if (f.step % SAMPLE_EVERY === 0 || i === steps - 1) points.push({ ...f.p });
   }
   return { points, end: null, endAt: null, closest: f.closest };
 }

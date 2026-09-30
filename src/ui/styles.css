@@ -128,9 +128,14 @@ canvas.stage {
   .slider {
     appearance: none;
     width: 100%;
-    height: 28px;
+    height: 44px;
     background: transparent;
     cursor: pointer;
+  }
+
+  .slider:disabled {
+    cursor: not-allowed;
+    opacity: 0.5;
   }
 
   .slider::-webkit-slider-runnable-track {
@@ -231,13 +236,16 @@ html[data-visual-bookmark="grazing"] #root {
   position: fixed;
   inset: 0;
   display: flex;
-  align-items: center;
+  align-items: safe center;
+  overflow-y: auto;
   pointer-events: auto;
   background: linear-gradient(90deg, #121629f2 0%, #121629bd 30%, #12162900 72%);
 }
 .opening-copy {
   width: min(540px, 45vw);
   margin-left: 5vw;
+  padding-block: 24px;
+  flex-shrink: 0;
 }
 .opening h1 {
   font-size: clamp(40px, 5.3vw, 78px);
@@ -281,14 +289,15 @@ html[data-visual-bookmark="grazing"] #root {
 @media (min-width: 800px) {
   .guide-card {
     position: absolute;
-    bottom: 190px;
+    top: var(--guide-top, 145px);
+    bottom: auto;
     left: 20px;
     max-width: 340px;
   }
 }
 @media (max-width: 639px) {
   .opening {
-    align-items: flex-end;
+    align-items: safe flex-end;
     background: linear-gradient(0deg, #121629 0%, #121629f0 24%, #12162900 72%);
   }
   .opening-copy {
@@ -309,6 +318,233 @@ html[data-visual-bookmark="grazing"] #root {
   .guide-card {
     font-size: 11px;
     line-height: 1.35;
+  }
+}
+
+/* Reserve bounded areas for readable panels, leaving the chart between them. */
+.play-hud {
+  position: fixed;
+  inset: 0;
+  height: 100dvh;
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr) auto;
+  gap: 12px;
+  padding: 16px 20px;
+  pointer-events: none;
+}
+.hud-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+  min-width: 0;
+  min-height: 0;
+}
+.mission-card {
+  max-height: 30dvh;
+  min-width: 0;
+}
+.hud-tools {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 8px;
+  flex-shrink: 0;
+  pointer-events: auto;
+}
+.hud-buttons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.hud-buttons > :first-child {
+  min-width: 44px;
+}
+.hud-status {
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  min-height: 0;
+}
+.hud-footer {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 12px;
+  min-height: 0;
+  max-height: 44dvh;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  padding: 2px 4px 6px;
+  width: min(100%, 760px);
+  justify-self: center;
+  pointer-events: auto;
+}
+.hud-footer > * {
+  flex-shrink: 0;
+}
+.launch-controls {
+  min-width: 0;
+}
+.launch-controls label {
+  min-width: 0;
+}
+.guide-card {
+  max-height: 30dvh;
+}
+.keyboard-scroll {
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  scrollbar-width: thin;
+  scroll-padding: 8px;
+}
+.keyboard-scroll:focus-visible {
+  outline-offset: -3px;
+}
+.result-card {
+  max-height: 41dvh;
+}
+.modal-backdrop {
+  z-index: 5;
+}
+.dialog-panel {
+  min-width: 0;
+  max-height: calc(100dvh - 24px);
+}
+
+@media (max-width: 799px) {
+  .play-hud {
+    padding: 12px;
+  }
+  .hud-header {
+    flex-direction: column;
+    gap: 8px;
+  }
+  .mission-card {
+    width: 100%;
+    max-width: none;
+    max-height: 22dvh;
+  }
+  .hud-tools {
+    width: 100%;
+    flex-direction: row;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .mission-clock {
+    font-size: 11px;
+  }
+  .guide-card {
+    width: 100%;
+    max-height: 20dvh;
+  }
+}
+
+/* A side rail preserves the chart on short phones instead of covering its centre. */
+@media (max-width: 720px) and (max-height: 550px) and (orientation: landscape) {
+  .play-hud {
+    left: auto;
+    width: min(320px, 54vw);
+    padding: 8px;
+    gap: 8px;
+    grid-template-rows: minmax(0, 30%) minmax(0, 1fr);
+  }
+  .hud-header {
+    grid-row: 1;
+    overflow: hidden;
+  }
+  .mission-card {
+    height: 100%;
+    max-height: none;
+    padding: 8px;
+  }
+  .hud-tools {
+    position: fixed;
+    left: 8px;
+    top: 8px;
+    width: calc(100vw - min(320px, 54vw) - 16px);
+  }
+  .hud-buttons {
+    flex-wrap: nowrap;
+    gap: 5px;
+  }
+  .hud-buttons .btn {
+    padding: 8px;
+    font-size: 10px;
+    letter-spacing: 0.04em;
+  }
+  .mission-clock {
+    position: fixed;
+    left: 8px;
+    bottom: 8px;
+  }
+  .hud-status {
+    position: fixed;
+    left: 8px;
+    right: calc(min(320px, 54vw) + 8px);
+    bottom: 48px;
+  }
+  .hud-footer {
+    grid-row: 2;
+    height: 100%;
+    max-height: none;
+    gap: 8px;
+    padding: 2px 0 6px;
+  }
+  .guide-card {
+    position: static;
+    max-height: 80px;
+    font-size: 11px;
+    line-height: 1.35;
+  }
+  .launch-controls {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    padding: 8px;
+    column-gap: 12px;
+  }
+  .launch-controls .btn {
+    padding: 10px;
+    min-width: 0;
+    font-size: 12px;
+  }
+  .launch-actions {
+    grid-column: 1 / -1;
+    justify-content: space-between;
+  }
+  .launch-notes,
+  .launch-controls .kbd {
+    display: none;
+  }
+  .fuel-label {
+    display: block;
+  }
+  .result-card {
+    max-height: 100%;
+    padding: 12px;
+  }
+  .result-wrap {
+    min-height: 0;
+    height: 100%;
+  }
+  .opening {
+    align-items: safe center;
+    background: linear-gradient(90deg, #121629f2, #121629c9 50%, #12162900);
+  }
+  .opening-copy {
+    width: min(420px, 72vw);
+    margin: 0 24px;
+    padding-block: 16px;
+  }
+  .opening h1 {
+    font-size: clamp(32px, 6vw, 42px);
+    margin: 12px 0;
+  }
+  .opening .premise {
+    font-size: 12px;
+    line-height: 1.4;
+    margin-bottom: 12px;
   }
 }
 @media (prefers-reduced-motion: reduce) {

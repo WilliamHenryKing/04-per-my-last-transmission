@@ -24,13 +24,19 @@ const base = () => import.meta.env?.BASE_URL ?? "/";
 
 let idle = true;
 const waiters: (() => void)[] = [];
-const manager = new THREE.LoadingManager(() => {
-  idle = true;
-  for (const done of waiters.splice(0)) done();
-});
-manager.onStart = () => {
-  idle = false;
-};
+let manager: THREE.LoadingManager;
+function makeManager() {
+  const next = new THREE.LoadingManager(() => {
+    if (manager !== next) return;
+    idle = true;
+    for (const done of waiters.splice(0)) done();
+  });
+  next.onStart = () => {
+    if (manager === next) idle = false;
+  };
+  return next;
+}
+manager = makeManager();
 
 /** Resolves once every texture and environment map requested so far has loaded. */
 export function whenLoaded(): Promise<void> {
@@ -40,11 +46,19 @@ export function whenLoaded(): Promise<void> {
 // Each tiling gets its own Texture (a clone made before its image arrives never uploads),
 // but the cache means every file is fetched and decoded once.
 THREE.Cache.enabled = true;
-const textures = new THREE.TextureLoader(manager);
+let textures = new THREE.TextureLoader(manager);
 const sets = new Map<PbrId, PbrSet>();
+const ownedTextures = new Map<THREE.Texture, string>();
+const ownedUrls = new Set<string>();
 
 function load(url: string, srgb: boolean): THREE.Texture {
-  const t = textures.load(url);
+  const t = textures.load(url, (loaded) => {
+    if (!ownedTextures.has(loaded) && ![...ownedTextures.values()].includes(url)) {
+      THREE.Cache.remove(`image:${url}`);
+    }
+  });
+  ownedTextures.set(t, url);
+  ownedUrls.add(url);
   t.colorSpace = srgb ? THREE.SRGBColorSpace : THREE.NoColorSpace;
   t.wrapS = THREE.RepeatWrapping;
   t.wrapT = THREE.RepeatWrapping;
@@ -68,14 +82,35 @@ export function pbr(id: PbrId): PbrSet {
 
 /** A set with its own tiling and offset (the image data is shared through the cache). */
 export function pbrTiled(id: PbrId, repeat: number, offset = 0): PbrSet {
-  const dir = `${base()}textures/${id}/`;
-  const tile = (name: string, srgb: boolean) => {
-    const t = load(`${dir}${name}.webp`, srgb);
-    t.repeat.set(repeat, repeat);
-    t.offset.set(offset, offset * 0.37);
-    return t;
+  return {
+    colour: pbrTexture(id, "colour", repeat, offset),
+    normal: pbrTexture(id, "normal", repeat, offset),
+    arm: pbrTexture(id, "arm", repeat, offset),
   };
-  return { colour: tile("colour", true), normal: tile("normal", false), arm: tile("arm", false) };
+}
+
+export function pbrTexture(id: PbrId, name: keyof PbrSet, repeat: number, offset = 0) {
+  const texture = load(`${base()}textures/${id}/${name}.webp`, name === "colour");
+  texture.repeat.set(repeat, repeat);
+  texture.offset.set(offset, offset * 0.37);
+  return texture;
+}
+
+export function disposeTexture(texture: THREE.Texture) {
+  ownedTextures.delete(texture);
+  texture.dispose();
+}
+
+export function disposeAssets() {
+  for (const texture of ownedTextures.keys()) texture.dispose();
+  ownedTextures.clear();
+  sets.clear();
+  for (const url of ownedUrls) THREE.Cache.remove(`image:${url}`);
+  ownedUrls.clear();
+  idle = true;
+  for (const done of waiters.splice(0)) done();
+  manager = makeManager();
+  textures = new THREE.TextureLoader(manager);
 }
 
 /**
@@ -84,17 +119,48 @@ export function pbrTiled(id: PbrId, repeat: number, offset = 0): PbrSet {
  */
 export function loadEnvironment(renderer: THREE.WebGLRenderer, scene: THREE.Scene) {
   const pmrem = new THREE.PMREMGenerator(renderer);
-  new HDRLoader(manager).load(`${base()}hdri/studio_small_09_1k.hdr`, (hdr) => {
-    hdr.mapping = THREE.EquirectangularReflectionMapping;
-    const env = pmrem.fromEquirectangular(hdr).texture;
-    scene.environment = env;
-    scene.background = hdr;
-    scene.backgroundBlurriness = 0.55;
-    scene.backgroundIntensity = 0.07;
-    scene.environmentIntensity = 0.85;
-    // The backdrop turns so the studio's softboxes sit behind and above the camera.
-    scene.backgroundRotation.set(0, 1.9, 0);
-    scene.environmentRotation.set(0, 1.9, 0);
+  let disposed = false;
+  let generatorDisposed = false;
+  let source: THREE.Texture | null = null;
+  let target: THREE.WebGLRenderTarget | null = null;
+  const releaseGenerator = () => {
+    if (generatorDisposed) return;
+    generatorDisposed = true;
     pmrem.dispose();
-  });
+  };
+  const url = `${base()}hdri/studio_small_09_1k.hdr`;
+  new HDRLoader(manager).load(
+    url,
+    (hdr) => {
+      if (disposed) {
+        hdr.dispose();
+        THREE.Cache.remove(`file:${url}`);
+        return;
+      }
+      source = hdr;
+      hdr.mapping = THREE.EquirectangularReflectionMapping;
+      target = pmrem.fromEquirectangular(hdr);
+      scene.environment = target.texture;
+      scene.background = hdr;
+      scene.backgroundBlurriness = 0.55;
+      scene.backgroundIntensity = 0.07;
+      scene.environmentIntensity = 0.85;
+      // The backdrop turns so the studio's softboxes sit behind and above the camera.
+      scene.backgroundRotation.set(0, 1.9, 0);
+      scene.environmentRotation.set(0, 1.9, 0);
+      releaseGenerator();
+    },
+    undefined,
+    releaseGenerator,
+  );
+  return () => {
+    if (disposed) return;
+    disposed = true;
+    if (scene.environment === target?.texture) scene.environment = null;
+    if (scene.background === source) scene.background = null;
+    target?.dispose();
+    source?.dispose();
+    releaseGenerator();
+    THREE.Cache.remove(`file:${url}`);
+  };
 }

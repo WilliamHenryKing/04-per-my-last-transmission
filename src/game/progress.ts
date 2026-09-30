@@ -1,3 +1,4 @@
+import { MISSIONS } from "./missions";
 import type { Outcome, Stamp } from "./rules";
 import { ALL_STAMPS } from "./rules";
 
@@ -52,16 +53,42 @@ export function parseProgress(raw: string | null): Progress {
   if (!raw) return EMPTY_PROGRESS;
   try {
     const v = JSON.parse(raw) as Partial<Progress>;
-    if (typeof v.unlocked !== "number" || typeof v.best !== "object" || v.best === null) {
+    if (
+      typeof v.unlocked !== "number" ||
+      !Number.isFinite(v.unlocked) ||
+      typeof v.best !== "object" ||
+      v.best === null ||
+      Array.isArray(v.best)
+    ) {
       return EMPTY_PROGRESS;
     }
-    // Keep only stamps this version awards (older saves had a fourth).
+    // Retain current missions and legacy stamps, but never merge invalid saved metrics.
     const best: Record<string, Best> = {};
-    for (const [id, b] of Object.entries(v.best as Record<string, Best>)) {
-      if (!b || !Array.isArray(b.stamps)) continue;
-      best[id] = { ...b, stamps: ALL_STAMPS.filter((s) => b.stamps.includes(s)) };
+    for (const mission of MISSIONS) {
+      const b = v.best[mission.id];
+      if (
+        !b ||
+        !Array.isArray(b.stamps) ||
+        !b.stamps.includes("DELIVERED") ||
+        typeof b.fuel !== "number" ||
+        !Number.isFinite(b.fuel) ||
+        b.fuel < 0 ||
+        typeof b.relSpeed !== "number" ||
+        !Number.isFinite(b.relSpeed) ||
+        b.relSpeed < 0
+      )
+        continue;
+      best[mission.id] = {
+        stamps: ALL_STAMPS.filter((stamp) => b.stamps.includes(stamp)),
+        fuel: b.fuel,
+        relSpeed: b.relSpeed,
+      };
     }
-    return { unlocked: Math.max(0, Math.floor(v.unlocked)), best, finished: !!v.finished };
+    return {
+      unlocked: Math.min(MISSIONS.length - 1, Math.max(0, Math.floor(v.unlocked))),
+      best,
+      finished: v.finished === true,
+    };
   } catch {
     return EMPTY_PROGRESS;
   }

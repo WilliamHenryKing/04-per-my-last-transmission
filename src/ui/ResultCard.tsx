@@ -1,10 +1,9 @@
 import { useGSAP } from "@gsap/react";
 import gsap from "gsap";
-import { useRef } from "react";
 import { MISSIONS } from "../game/missions";
 import type { Stamp, Verdict } from "../game/rules";
 import type { Controller } from "./controller";
-import { useFocusOnMount } from "./useFocusOnMount";
+import { usePanelFocus } from "./focus";
 
 gsap.registerPlugin(useGSAP);
 
@@ -22,10 +21,9 @@ const STAMP_NOTES: Record<Stamp, string> = {
 };
 
 export function ResultCard({ game, reducedMotion }: { game: Controller; reducedMotion: boolean }) {
-  const focusRef = useFocusOnMount<HTMLButtonElement>();
+  const root = usePanelFocus(false);
   const s = game.session;
   const o = s.outcome;
-  const root = useRef<HTMLDivElement>(null);
   const good = o?.verdict === "delivered";
 
   useGSAP(
@@ -47,19 +45,22 @@ export function ResultCard({ game, reducedMotion }: { game: Controller; reducedM
         delay: 0.3,
       });
     },
-    { scope: root, dependencies: [o] },
+    { scope: root, dependencies: [o, reducedMotion], revertOnUpdate: true },
   );
 
   if (!o) return null;
   const last = s.index === MISSIONS.length - 1;
   return (
-    <div className="flex w-full justify-center">
+    <div className="result-wrap flex w-full justify-center">
       <div
         ref={root}
-        className="plate pointer-events-auto w-full max-w-[480px] px-4 py-3 text-center"
+        className="plate result-card keyboard-scroll pointer-events-auto w-full max-w-[480px] px-4 py-3 text-center"
         role="dialog"
         aria-modal="false"
         aria-labelledby="result-title"
+        aria-describedby="result-detail result-meta"
+        // biome-ignore lint/a11y/noNoninteractiveTabindex: A bounded result needs a keyboard stop for reading and native scrolling.
+        tabIndex={0}
       >
         <h2 id="result-title" className="sr-only">
           {o.headline}
@@ -67,7 +68,9 @@ export function ResultCard({ game, reducedMotion }: { game: Controller; reducedM
         <p className={`stamp stamp-big ${good ? "text-enamel" : "text-post"}`}>
           {BIG_STAMP[o.verdict]}
         </p>
-        <p className="mt-3 text-sm">{o.detail}</p>
+        <p id="result-detail" className="mt-3 text-sm">
+          {o.detail}
+        </p>
         {good && (
           <ul className="mt-3 flex flex-wrap justify-center gap-2" aria-label="Stamps earned">
             {o.stamps.map((st) => (
@@ -81,19 +84,25 @@ export function ResultCard({ game, reducedMotion }: { game: Controller; reducedM
             ))}
           </ul>
         )}
-        <p className="label mt-3 text-[10px] opacity-70">
+        <p id="result-meta" className="label mt-3 text-[10px] opacity-70">
           Fuel {o.fuel}
           {s.mission.fuelPar ? ` / budget ${s.mission.fuelPar}` : ""} ·{" "}
           {o.braked ? "Brake used" : "Brake unused"} · Attempt {s.attempts}
         </p>
         {!good && (
           <p className="mt-2 text-xs italic opacity-80">
-            Your route stays on the chart in red, with a ring where the dock was at your closest
+            Retry to compare your last route in red, with a ring where the dock was at your closest
             pass.
           </p>
         )}
         <div className="mt-4 flex justify-center gap-2">
-          <button type="button" className="btn" onClick={() => game.retry()}>
+          <button
+            type="button"
+            className="btn"
+            onClick={() => game.retry()}
+            data-result-primary={!good || undefined}
+            aria-keyshortcuts="R"
+          >
             Retry<span className="kbd max-sm:hidden">R</span>
           </button>
           {good && (
@@ -101,7 +110,8 @@ export function ResultCard({ game, reducedMotion }: { game: Controller; reducedM
               type="button"
               className="btn btn-post"
               onClick={() => game.next()}
-              ref={focusRef}
+              data-result-primary
+              aria-keyshortcuts="N"
             >
               {last ? "File report" : "Next parcel"}
               <span className="kbd max-sm:hidden">N</span>

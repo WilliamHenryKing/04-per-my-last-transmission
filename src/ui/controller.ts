@@ -1,5 +1,6 @@
 import { MISSIONS } from "../game/missions";
 import { EMPTY_PROGRESS, type Progress, parseProgress, record } from "../game/progress";
+import type { Outcome } from "../game/rules";
 import { type Cue, Session } from "../game/session";
 import type { Aim } from "../game/types";
 
@@ -18,6 +19,7 @@ export interface Sound {
       | "ending",
   ): void;
   setMuted(muted: boolean): void;
+  cancelPending?(): void;
 }
 
 const SILENT: Sound = { muted: true, play() {}, setMuted() {} };
@@ -66,6 +68,7 @@ export class Controller {
   private seenSession = -1;
   private seenClock = -1;
   private toastTimer = 0;
+  private recordedOutcome: Outcome | null = null;
 
   private readonly sound: Sound;
 
@@ -128,7 +131,8 @@ export class Controller {
 
   private onEnd() {
     const s = this.session;
-    if (!s.outcome) return;
+    if (!s.outcome || this.recordedOutcome === s.outcome) return;
+    this.recordedOutcome = s.outcome;
     const next = record(this.progress, s.mission.id, s.index, MISSIONS.length, s.outcome);
     if (next !== this.progress) {
       this.progress = next;
@@ -152,14 +156,26 @@ export class Controller {
     this.bump();
   }
 
+  setReducedMotion(reduced: boolean) {
+    if (!reduced || this.opening !== "glide") return;
+    this.opening = "done";
+    this.bump();
+  }
+
   replayGuide() {
+    if (this.opening !== "done" || this.view !== "play") return;
     this.hintOpen = true;
-    this.guideStep = this.session.phase === "flight" ? 2 : 0;
+    this.guideStep =
+      this.session.phase === "result" || this.session.flight?.braked
+        ? 3
+        : this.session.phase === "flight"
+          ? 2
+          : 0;
     this.bump();
   }
 
   setAim(aim: Partial<Aim>) {
-    if (this.opening !== "done") return;
+    if (this.opening !== "done" || this.view !== "play") return;
     const before = this.session.version;
     this.session.setAim(aim);
     if (this.session.version === before) return;
@@ -181,7 +197,7 @@ export class Controller {
   }
 
   brake() {
-    if (this.opening === "done" && this.session.brake()) {
+    if (this.opening === "done" && this.view === "play" && this.session.brake()) {
       if (this.hintOpen) this.guideStep = 3;
       this.bump();
     }
@@ -194,16 +210,22 @@ export class Controller {
   }
 
   retry() {
-    if (this.view !== "play") return;
-    if (this.session.phase === "aim" && !this.session.last) return;
+    if (this.view !== "play" || this.opening !== "done") return;
+    this.onEnd();
+    this.sound.cancelPending?.();
     this.sound.play("ui-retry");
     this.session.reset();
+    this.toast = null;
     if (this.hintOpen) this.guideStep = 0;
+    this.bump();
   }
 
   next() {
+    if (this.view !== "play" || this.opening !== "done") return;
     const s = this.session;
     if (s.outcome?.verdict !== "delivered") return;
+    this.onEnd();
+    this.sound.cancelPending?.();
     if (s.index === MISSIONS.length - 1) {
       this.view = "ending";
       this.sound.play("ending");
@@ -212,18 +234,32 @@ export class Controller {
     }
     this.sound.play("ui-next");
     s.select(s.index + 1);
+    this.toast = null;
+    if (this.hintOpen) this.guideStep = 0;
+    this.bump();
   }
 
   select(index: number) {
-    if (index > this.progress.unlocked) return;
+    this.onEnd();
+    if (
+      this.opening !== "done" ||
+      !Number.isInteger(index) ||
+      index < 0 ||
+      index >= MISSIONS.length ||
+      index > this.progress.unlocked
+    )
+      return;
+    this.sound.cancelPending?.();
     this.sound.play("ui-next");
     this.session.select(index);
     this.view = "play";
+    this.toast = null;
+    if (this.hintOpen) this.guideStep = 0;
     this.bump();
   }
 
   openMissions() {
-    if (this.view === "missions") return;
+    if (this.view === "missions" || this.opening !== "done") return;
     this.sound.play("ui-open");
     this.view = "missions";
     this.bump();
