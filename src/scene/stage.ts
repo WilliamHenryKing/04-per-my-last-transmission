@@ -32,6 +32,7 @@ export interface Stage {
   follow(dt: number, focus: { x: number; y: number } | null): void;
   /** Visual-test override: a fixed camera shot, or null to return to the game camera. */
   setShot(shot: CameraShot | null): void;
+  homeShot(): CameraShot;
   /** The governor's state, and one step down as a slow frame run would take (tests). */
   quality(): Record<string, unknown>;
   degrade(): boolean;
@@ -41,6 +42,8 @@ export interface CameraShot {
   position: THREE.Vector3;
   target: THREE.Vector3;
   fov: number;
+  shiftX?: number;
+  shiftY?: number;
 }
 
 const GAME_FOV = 34;
@@ -179,7 +182,7 @@ export function createStage(canvas: HTMLCanvasElement): Stage {
     const deep = extents.maxY - extents.minY;
     const screenW = portrait ? deep : across;
     const screenH = (portrait ? across : deep) * Math.sin(ELEVATION);
-    const vfov = THREE.MathUtils.degToRad(camera.fov);
+    const vfov = THREE.MathUtils.degToRad(GAME_FOV);
     const hfov = 2 * Math.atan(Math.tan(vfov / 2) * aspect);
     // Leave room for the HUD bands at the top and bottom of the screen.
     const hudShare = portrait ? 0.62 : 0.74;
@@ -201,7 +204,7 @@ export function createStage(canvas: HTMLCanvasElement): Stage {
     camera.fov = shot?.fov ?? GAME_FOV;
     aimCamera();
     // Nudge the view so the play area sits slightly above the control panel.
-    if (shot) camera.clearViewOffset();
+    if (shot) camera.setViewOffset(w, h, w * (shot.shiftX ?? 0), h * (shot.shiftY ?? 0), w, h);
     else camera.setViewOffset(w, h, 0, portrait ? h * 0.07 : h * 0.03, w, h);
     camera.updateProjectionMatrix();
   }
@@ -241,6 +244,13 @@ export function createStage(canvas: HTMLCanvasElement): Stage {
       shot = next;
       place();
     },
+    homeShot: () => ({
+      position: basePosition.clone(),
+      target: baseTarget.clone(),
+      fov: GAME_FOV,
+      shiftX: 0,
+      shiftY: camera.aspect < 0.9 ? 0.07 : 0.03,
+    }),
     quality: () => pipeline.state,
     degrade: () => pipeline.step(),
     nudge(strength, delay = 0) {

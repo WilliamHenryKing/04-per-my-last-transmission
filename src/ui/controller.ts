@@ -57,6 +57,9 @@ export class Controller {
   progress: Progress;
   view: View = "play";
   hintOpen: boolean;
+  guideStep = 0;
+  opening: "title" | "glide" | "done";
+  openingClock = 0;
   toast: { text: string; id: number } | null = null;
   version = 0;
   private listeners = new Set<() => void>();
@@ -71,6 +74,9 @@ export class Controller {
     this.progress = parseProgress(load(PROGRESS_KEY)) ?? EMPTY_PROGRESS;
     this.session = new Session(Math.min(this.progress.unlocked, MISSIONS.length - 1));
     this.hintOpen = load(HINT_KEY) !== "seen";
+    const query = new URLSearchParams(window.location.search);
+    this.opening =
+      (import.meta.env.DEV || query.has("e2e")) && !query.has("intro") ? "done" : "title";
   }
 
   subscribe = (fn: () => void) => {
@@ -87,6 +93,13 @@ export class Controller {
 
   /** Called every animation frame after the session advanced. */
   frame(dt: number, cues: Cue[]) {
+    if (this.opening !== "done") {
+      this.openingClock += dt;
+      if (this.opening === "glide" && this.openingClock >= 2.8) {
+        this.opening = "done";
+        this.bump();
+      }
+    }
     for (const c of cues) {
       const text = CUE_TOASTS[c];
       if (text) this.showToast(text);
@@ -131,11 +144,27 @@ export class Controller {
     this.bump();
   }
 
+  begin(reducedMotion: boolean) {
+    if (this.opening !== "title") return;
+    this.opening = reducedMotion ? "done" : "glide";
+    this.openingClock = 0;
+    this.sound.play("ui-open");
+    this.bump();
+  }
+
+  replayGuide() {
+    this.hintOpen = true;
+    this.guideStep = this.session.phase === "flight" ? 2 : 0;
+    this.bump();
+  }
+
   setAim(aim: Partial<Aim>) {
+    if (this.opening !== "done") return;
     const before = this.session.version;
     this.session.setAim(aim);
     if (this.session.version === before) return;
     this.sound.play("ui-tick");
+    if (this.hintOpen && this.guideStep === 0) this.guideStep = 1;
     this.bump();
   }
 
@@ -145,14 +174,17 @@ export class Controller {
   }
 
   launch() {
-    if (this.view !== "play") return;
+    if (this.view !== "play" || this.opening !== "done") return;
     if (!this.session.launch()) return;
-    this.dismissHint();
+    if (this.hintOpen) this.guideStep = 2;
     this.bump();
   }
 
   brake() {
-    if (this.session.brake()) this.bump();
+    if (this.opening === "done" && this.session.brake()) {
+      if (this.hintOpen) this.guideStep = 3;
+      this.bump();
+    }
   }
 
   /** One action for the big button: launch while aiming, brake while flying. */
@@ -166,6 +198,7 @@ export class Controller {
     if (this.session.phase === "aim" && !this.session.last) return;
     this.sound.play("ui-retry");
     this.session.reset();
+    if (this.hintOpen) this.guideStep = 0;
   }
 
   next() {

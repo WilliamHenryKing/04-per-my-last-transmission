@@ -6,6 +6,7 @@ import { Hint } from "./Hint";
 import { MissionCard } from "./MissionCard";
 import { MissionList } from "./MissionList";
 import { ResultCard } from "./ResultCard";
+import { Title } from "./Title";
 
 export interface AppProps {
   game: Controller;
@@ -23,6 +24,13 @@ export function App({ game, reducedMotion }: AppProps) {
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
       if (e.metaKey || e.ctrlKey || e.altKey) return;
+      if (game.opening !== "done") {
+        if (e.key === "Enter" && !e.repeat) {
+          e.preventDefault();
+          game.begin(reducedMotion);
+        }
+        return;
+      }
       if (e.key.toLowerCase() === "m" && !isTyping(e.target)) {
         game.toggleMute();
         e.preventDefault();
@@ -54,7 +62,10 @@ export function App({ game, reducedMotion }: AppProps) {
     };
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
-  }, [game]);
+  }, [game, reducedMotion]);
+
+  if (game.opening !== "done")
+    return game.opening === "title" ? <Title onBegin={() => game.begin(reducedMotion)} /> : null;
 
   return (
     <div className="pointer-events-none fixed inset-0 flex flex-col justify-between gap-3 p-3 sm:p-5">
@@ -71,6 +82,14 @@ export function App({ game, reducedMotion }: AppProps) {
             {s.time.toFixed(1).padStart(4, "0")}s
           </div>
           <div className="flex gap-2">
+            <button
+              type="button"
+              className="btn"
+              aria-label="Replay the guide"
+              onClick={() => game.replayGuide()}
+            >
+              ?
+            </button>
             <button
               type="button"
               className="btn min-h-11 px-3 py-2 text-xs sm:py-3"
@@ -104,7 +123,9 @@ export function App({ game, reducedMotion }: AppProps) {
         {s.phase === "result" && game.view === "play" && (
           <ResultCard game={game} reducedMotion={reducedMotion} />
         )}
-        {game.hintOpen && s.phase !== "result" && <Hint onDismiss={() => game.dismissHint()} />}
+        {game.hintOpen && game.view === "play" && (
+          <Hint step={game.guideStep} onDismiss={() => game.dismissHint()} />
+        )}
         <Controls game={game} />
       </footer>
 

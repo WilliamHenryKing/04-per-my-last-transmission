@@ -34,7 +34,7 @@ test("mission 1: aim, launch, brake and get the mug signed for", async ({ page }
   await expect(page.locator("#arrival")).toHaveCount(0, { timeout: 20_000 });
   await page.clock.pauseAt(Date.now() + 60_000);
 
-  await page.getByRole("button", { name: "Noted" }).click();
+  await page.getByRole("button", { name: "Skip the guide" }).click();
   await expect(page.getByLabel("How to deliver")).toHaveCount(0);
 
   // Restart the mission from the manifest so the world clock is back at zero.

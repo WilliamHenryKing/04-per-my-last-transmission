@@ -4,6 +4,7 @@ import { hitsForCue } from "./audio/sounds";
 import { predictBrake, predictFrom, predictLaunch } from "./game/predict";
 import { worldReady } from "./loader";
 import { whenLoaded } from "./scene/assets";
+import { Opening } from "./scene/opening";
 import { createStage } from "./scene/stage";
 import { World } from "./scene/world";
 import { App } from "./ui/App";
@@ -29,6 +30,7 @@ document.body.prepend(canvas);
 
 const stage = createStage(canvas);
 const world = new World(stage);
+const opening = new Opening(stage);
 let missionShown = "";
 
 function aimFromPointer(e: PointerEvent) {
@@ -47,7 +49,7 @@ function aimFromPointer(e: PointerEvent) {
 }
 
 canvas.addEventListener("pointerdown", (e) => {
-  if (session.phase !== "aim" || game.view !== "play") return;
+  if (session.phase !== "aim" || game.view !== "play" || game.opening !== "done") return;
   canvas.setPointerCapture(e.pointerId);
   aimFromPointer(e);
 });
@@ -90,14 +92,15 @@ function frame(now: number) {
     missionShown = session.mission.id;
     world.setMission(session.mission);
   }
-  if (game.view === "play") session.advance(dt);
+  if (game.view === "play" && game.opening === "done") session.advance(dt);
   const cues = session.drain();
   for (const cue of cues) world.react(cue, session, motionQuery.matches);
   if (cues.includes("end")) {
     const v = session.outcome?.verdict;
     if (v === "crashed" || v === "rejected") world.shatter(motionQuery.matches);
   }
-  game.frame(animDt, cues);
+  const veil = document.getElementById("arrival");
+  game.frame(!veil || veil.classList.contains("is-done") ? animDt : 0, cues);
   for (const cue of cues) {
     for (const hit of hitsForCue(cue, session.outcome?.verdict ?? null)) {
       audio.play(hit.id, hit.delay, hit.rate);
@@ -119,6 +122,7 @@ function frame(now: number) {
     course: session.phase === "flight" && f ? predictFrom(m, f, m.guideSeconds) : null,
     brakeGhost: session.phase === "flight" && f ? predictBrake(m, f) : null,
   });
+  opening.update(game, m, motionQuery.matches);
   stage.render(frameMs);
   visual?.onFrame();
   if (first) {
