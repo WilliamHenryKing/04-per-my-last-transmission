@@ -71,6 +71,8 @@ export function installVisualTest(
     settle(frames = 3) {
       return new Promise<void>((done) => waiters.push({ left: frames, done }));
     },
+    quality: () => stage.quality(),
+    degrade: () => stage.degrade(),
   };
   Object.assign(window, { __VISUAL_TEST__: api });
   return hooks;

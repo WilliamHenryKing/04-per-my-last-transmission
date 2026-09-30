@@ -1,7 +1,7 @@
 import * as THREE from "three";
 import { loadEnvironment } from "./assets";
 import { PALETTE } from "./palette";
-import { Pipeline, pickTier, type Tier } from "./pipeline";
+import { modestGpu, Pipeline, pickTier, type Tier } from "./pipeline";
 import { makeTable, TABLE_TOP } from "./table";
 
 // Renderer, camera, lights and the enamel table the miniature sits on.
@@ -32,6 +32,9 @@ export interface Stage {
   follow(dt: number, focus: { x: number; y: number } | null): void;
   /** Visual-test override: a fixed camera shot, or null to return to the game camera. */
   setShot(shot: CameraShot | null): void;
+  /** The governor's state, and one step down as a slow frame run would take (tests). */
+  quality(): Record<string, unknown>;
+  degrade(): boolean;
 }
 
 export interface CameraShot {
@@ -87,8 +90,14 @@ export function createStage(canvas: HTMLCanvasElement): Stage {
     stencil: false,
     powerPreference: "high-performance",
   });
-  const pixelRatio = Math.min(window.devicePixelRatio, tier === "high" ? 2 : 1.5);
-  renderer.setPixelRatio(pixelRatio);
+  // Within a pixel budget per tier (a high-density screen need not draw every device pixel),
+  // times the governor's resolution scale.
+  const pixelRatio = (w: number, h: number) =>
+    Math.min(
+      window.devicePixelRatio || 1,
+      tier === "high" ? 2 : 1.5,
+      Math.sqrt((tier === "high" ? 3.7e6 : 1.2e6) / Math.max(1, w * h)),
+    ) * pipeline.scale;
   // One tone mapper (AgX), applied once by the pipeline's OutputPass; exposure is the one
   // brightness control.
   renderer.toneMapping = THREE.AgXToneMapping;
@@ -111,7 +120,7 @@ export function createStage(canvas: HTMLCanvasElement): Stage {
 
   const camera = new THREE.PerspectiveCamera(GAME_FOV, 1, 0.05, 400);
   let extents: Extents = { minX: -8, maxX: 8, minY: -5, maxY: 5 };
-  const pipeline = new Pipeline(renderer, scene, camera, tier, () => aoHidden);
+  const pipeline = new Pipeline(renderer, scene, camera, tier, () => aoHidden, modestGpu());
   const query = new URLSearchParams(window.location.search);
   pipeline.adaptive = !query.has("e2e") && !query.has("quality");
 
@@ -200,10 +209,13 @@ export function createStage(canvas: HTMLCanvasElement): Stage {
   function resize() {
     const w = canvas.clientWidth;
     const h = canvas.clientHeight;
+    const ratio = pixelRatio(w, h);
+    renderer.setPixelRatio(ratio);
     renderer.setSize(w, h, false);
-    pipeline.setSize(w, h, pixelRatio);
+    pipeline.setSize(w, h, ratio);
     place();
   }
+  pipeline.onScale = resize;
 
   const ray = new THREE.Raycaster();
   const ground = new THREE.Plane(new THREE.Vector3(0, 1, 0), 0);
@@ -229,6 +241,8 @@ export function createStage(canvas: HTMLCanvasElement): Stage {
       shot = next;
       place();
     },
+    quality: () => pipeline.state,
+    degrade: () => pipeline.step(),
     nudge(strength, delay = 0) {
       shakeStrength = strength;
       shakeLeft = 0.28;
