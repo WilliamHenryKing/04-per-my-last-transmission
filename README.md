@@ -1,82 +1,83 @@
-<p align="center">
-  <a href="https://04-per-my-last-transmission.williamking.workers.dev"><img src="docs/readme/banner.svg" alt="PER MY LAST TRANSMISSION: a parcel arcs from a red enamel cannon into a moon café dock and gets stamped DELIVERED" width="100%"></a>
-</p>
+# PER MY LAST TRANSMISSION
 
-<p align="center">
-  <a href="https://04-per-my-last-transmission.williamking.workers.dev"><img alt="Play it live" src="https://img.shields.io/badge/Play_it_live-1b1f2e?style=for-the-badge&logo=googlechrome&logoColor=white"></a>
-  <a href="https://threejs.org"><img alt="Three.js" src="https://img.shields.io/badge/Three.js-d8432e?style=for-the-badge&logo=threedotjs&logoColor=white"></a>
-  <a href="https://www.typescriptlang.org"><img alt="TypeScript" src="https://img.shields.io/badge/TypeScript-d8432e?style=for-the-badge&logo=typescript&logoColor=white"></a>
-  <a href="https://react.dev"><img alt="React" src="https://img.shields.io/badge/React-d8432e?style=for-the-badge&logo=react&logoColor=white"></a>
-  <a href="https://vite.dev"><img alt="Vite" src="https://img.shields.io/badge/Vite-d8432e?style=for-the-badge&logo=vite&logoColor=white"></a>
-  <a href="https://bun.sh"><img alt="Bun" src="https://img.shields.io/badge/Bun-d8432e?style=for-the-badge&logo=bun&logoColor=white"></a>
-  <a href="https://tailwindcss.com"><img alt="Tailwind CSS" src="https://img.shields.io/badge/Tailwind_CSS-d8432e?style=for-the-badge&logo=tailwindcss&logoColor=white"></a>
-  <a href="https://gsap.com"><img alt="GSAP" src="https://img.shields.io/badge/GSAP-d8432e?style=for-the-badge&logo=greensock&logoColor=white"></a>
-</p>
+<p align="center"><img src="docs/readme/banner.svg" alt="PER MY LAST TRANSMISSION" width="100%"></p>
 
-<p align="center"><strong>Fling fragile parcels through tiny, moving gravity wells for an interplanetary postal service that insists the planets moving is not its problem.</strong></p>
+An orbital parcel service with moving addresses and fragile contents. Aim a depot cannon, let gravity bend the flight and use one carefully timed brake to meet the receiving dock. The dotted route predicts the same physics that will carry your parcel.
 
-<p align="center">
-  <a href="https://04-per-my-last-transmission.williamking.workers.dev"><img src="docs/readme/preview.gif" alt="Mission 1 in play: aiming the cannon, the dotted route bending round the moon, launch, one brake, and the DELIVERED stamp" width="800"></a>
-</p>
+**[Report for duty →](https://04-per-my-last-transmission.williamking.workers.dev)** · [Run locally](#run-locally) · [Credits](#credits)
 
-## How to play
+<p align="center"><img src="docs/readme/preview.gif" alt="Current orbital-table opening, camera glide and action-led delivery guide" width="800"></p>
 
-Aim the depot cannon so gravity bends the parcel into the receiving dock as it swings past on its orbit, then arrive gently enough for the contents to survive. The dotted guide is honest: it is the real flight, simulated ahead of time.
+## Your first delivery
 
-| Action | Keyboard | Mouse / touch |
+Choose **Report for duty** or press Enter to leave the moving orrery title shot. The four-step guide waits for you to aim, launch, brake and arrive; it can be skipped or replayed from help. Reduced motion cuts the camera transition.
+
+The dock keeps moving while you aim, so launch time matters as much as angle and power. A brass ghost previews what braking now would do. After a miss, the red dashed trace and closest-pass marker explain where the attempt went wrong.
+
+| Action | Keyboard | Pointer or touch |
 | --- | --- | --- |
-| Aim | `←` `→` or `A` `D` (hold `Shift` for 5° steps) | Drag on the chart away from the cannon: direction is angle |
-| Power | `↑` `↓` or `W` `S` | Drag distance, or the **Power** slider |
-| Launch (timing matters: the planets keep moving) | `Space` or `Enter` | **Launch** |
-| Brake, once per flight (the brass dots preview it) | `B` or `Space` | **Brake ×1** |
-| Retry, instantly, even mid-flight | `R` | **Retry** |
-| Next parcel after a delivery | `N` or `Enter` | **Next parcel** |
-| Mission manifest | `L` (`Esc` closes) | **Missions** |
-| Mute (remembered) | `M` | **Sound** |
+| Aim / power | Arrows or WASD; Shift changes the aim step | Drag the chart; Power slider |
+| Launch | Space or Enter | Launch |
+| Brake once in flight | B or Space | Brake ×1 |
+| Retry, including mid-flight | R | Retry |
+| Advance after delivery | N or Enter | Next parcel |
+| Open the mission list | L; Escape closes | Missions |
+| Toggle sound | M | Sound |
 
-Each mission earns up to three stamps: **Delivered**, **Gentle** (contents intact: under half the arrival limit) and **Frugal** (fuel within budget).
+## Eight parcels, different problems
 
-## What's inside
+The manifest introduces moving docks, debris, a second gravity well, a dock carried by a moon and ricochets. Fragile parcels punish hard impacts; robust parcels can bounce. Each mission awards Delivered, Gentle and Frugal stamps for arrival, a sufficiently soft landing and fuel discipline. Complete the manifest to reach the ending, then replay for a better set of stamps.
 
-- **Eight authored missions**, each adding one idea: a single moon, a robust parcel, a fast dock, debris, a second gravity well, a dock on a moving moon, a ricochet, then everything at once.
-- **Two parcel behaviours.** Fragile parcels need a gentle arrival and shatter on debris; robust ones shrug off a harder landing and ricochet off debris.
-- **One brake, no second chances.** A brake ghost shows exactly where pulling it now would take you.
-- **Your last attempt stays on the chart** as a red dashed route, with a ring showing where the dock was at your closest pass, so you learn instead of guess.
-- **Dry parcel-service humour.** "Just circling back." "Arrived with excessive enthusiasm." "This could have been a wormhole."
-- **Sound design:** elevator hold music while you aim, a space bed in flight, and a thunk, whoosh or smash for everything that happens.
-- **Accessible by default:** keyboard, mouse and touch; labelled controls with visible focus; `prefers-reduced-motion` honoured throughout.
+## Engineering details
 
-<table>
-  <tr>
-    <td width="72%"><img src="docs/readme/desktop.png" alt="Desktop: the finale mission, a gas giant ringed by orbiting debris, the dotted guide ending at a red cross" width="100%"></td>
-    <td width="28%"><img src="docs/readme/phone.png" alt="Phone: mission 1 in flight, the parcel curving toward the Moon Café with the brass brake preview" width="100%"></td>
-  </tr>
-  <tr>
-    <td align="center"><sub>Desktop, 1440×900</sub></td>
-    <td align="center"><sub>Phone, 390×844</sub></td>
-  </tr>
-</table>
+- **Shared flight and prediction:** analytic orbits and a fixed 120 Hz simulation drive the actual parcel, route preview and brake ghost. Retry resets the simulation clock.
+- **A physical miniature:** enamel surfaces, ceramic planets and brass supports sit under a shared environment light, contact shadows and restrained bloom.
+- **Adaptive cost:** quality tiers and a frame governor lower expensive rendering work on slower graphics chips; prepared assets and the first successful draw gate the opening.
+- **Reliable interaction:** keyboard and pointer ownership survive canceled drags, blur and dialogs. Mission and ending panels retain usable native focus, including compact touch layouts.
 
-## Built with
+## Recorded release verification
 
-Three.js 0.186 (no React Three Fiber) · TypeScript (strict) · React 19 for the HUD · Vite · Bun · Tailwind CSS v4 · GSAP · Biome · Playwright
+Application revision `49d3b5e`: **107 tests / 1,654 assertions**, 200 independently checked timing variants and four RTX 2060 browser scenarios covering all eight deliveries, ending/replay and touch/input regressions. See the [bug-pass report](docs/visual/BUG-PASS-2026-09-30.md).
 
-- **Deterministic orbital flight.** Planets, moons and docks ride analytic orbits. The parcel is integrated at a fixed 120 Hz step, and the world clock counts whole ticks, so the same inputs always produce the same flight. Retry restarts the clock, which makes every attempt reproducible.
-- **Honest path prediction.** The guide, the brake ghost and the real flight all call the same `step()` function. A unit test asserts that the prediction matches the flight to the bit.
-- **Solver-verified missions.** `scripts/solve.ts` grid-searches launch timing, angle, power and brake moment for each mission. Every mission ships with a reference route that the tests fly, and the Playwright suite delivers all eight through the real controls, then checks the ending and replay. Phone layouts, live motion preferences and input edge cases have separate browser coverage.
-- **One physically based lighting model.** A CC0 studio HDRI, prefiltered to a PMREM, lights everything and is also the (blurred) backdrop. There is one key light with fitted, texel-snapped shadows. AgX is applied once in the output pass. GTAO grounds contact, bloom is limited to the two things that actually glow (each carries a real light), and SMAA smooths edges. Phones get a lighter tier. Materials are chipped enamel and powder-coat scans, glazed ceramic planets with a clearcoat, and brass orrery stands, so nothing floats.
+[src/game/](src/game/) owns flight and scoring; [src/scene/](src/scene/) draws the orrery; [src/ui/](src/ui/) owns controls; [src/audio/](src/audio/) owns sound. [scripts/solve.ts](scripts/solve.ts) searches launch and brake routes.
 
-## Run it locally
+## Current screenshots
+
+| Desktop | Phone |
+| --- | --- |
+| <img src="docs/readme/desktop.jpg" alt="PER MY LAST TRANSMISSION: current desktop opening" width="600"> | <img src="docs/readme/phone.jpg" alt="PER MY LAST TRANSMISSION: current phone interface" width="240"> |
+
+<img src="docs/readme/detail.jpg" alt="PER MY LAST TRANSMISSION: the experience after the opening" width="800">
+
+The opening loop and three main screenshots were captured from the live site on **1 October 2026**, using Chrome on this workstation; the phone image is a 390 × 844 browser viewport. The animated preview is a short loop, not a full playthrough. [Capture details](docs/readme/capture.json).
+
+## Run locally
+
+Use **Bun 1.3.10** (the version pinned in `package.json`) and Node.js 22.12 or newer. From this repository:
 
 ```sh
-bun install
-bun run dev        # http://127.0.0.1:4514/
-bun run check      # strict tsc, Biome, unit tests, production build into dist/
+bun install --frozen-lockfile
+bun run dev      # http://127.0.0.1:4514/
+bun run check    # strict types, Biome, unit tests and production build
+bun run preview  # http://127.0.0.1:4614/ after the build
 ```
 
-Extras: `bun run test:e2e` (Playwright on the production build), `bun scripts/solve.ts [missionId]` (route finder) and `bun scripts/capture-readme.ts` (regenerates the README media; needs `ffmpeg`).
+Development and preview are separate long-running commands; run one at a time or use separate terminals. `bun run build` writes the static production output to `dist/`. Dependencies and the lockfile are local to this project.
 
-Code map: `src/game/` pure rules and state (tested) · `src/scene/` three.js miniature · `src/audio/` sound manifest and Web Audio engine · `src/ui/` React HUD · `src/main.tsx` wiring.
+### Browser suite
+
+Install the test browser once, then run the checked-in Playwright suite. Its configuration builds and starts the production preview. Browser scenarios are separate from `bun run check`.
+
+```sh
+bunx playwright install chromium
+bun run test:e2e
+```
+
+The recorded real-GPU release checks used installed Chrome on an RTX 2060; the default Chromium configuration is not a claim of physical-phone coverage.
+
+## Stack and release
+
+Direct Three.js 0.186 · React 19.3 · strict TypeScript · Vite 8.3 · GSAP 3.15 · Tailwind CSS 4.3 · Bun 1.3.10 · Biome. The public website is served by Cloudflare Workers. This README describes [application revision 49d3b5e](https://github.com/WilliamHenryKing/04-per-my-last-transmission/commit/49d3b5e8f18f7012b12d9fad736497a00657ecd3); the documentation refresh changes no application behaviour.
 
 ## Credits
 
@@ -86,33 +87,33 @@ Geometry, the planet glazes, the printed star chart and the README art are made 
 
 | Asset | Used for | Source | Author | Licence |
 | --- | --- | --- | --- | --- |
-| Painted Metal 004 | Postal-red enamel: depot drum, dock awning | https://ambientcg.com/view?id=PaintedMetal004 | ambientCG | CC0 |
-| Painted Metal 012 | Cream and teal enamel: café hut, dock pad | https://ambientcg.com/view?id=PaintedMetal012 | ambientCG | CC0 |
-| Metal 027 | Powder-coated steel: cannon barrel, stand feet, crate | https://ambientcg.com/view?id=Metal027 | ambientCG | CC0 |
-| Cardboard 001 | The battered parcel | https://ambientcg.com/view?id=Cardboard001 | ambientCG | CC0 |
-| Kitchen Wood | Chart-table frame | https://polyhaven.com/a/kitchen_wood | Poly Haven | CC0 |
-| Rough Linen | Weave of the star-chart sheet | https://polyhaven.com/a/rough_linen | Poly Haven | CC0 |
-| Rock Face 03 | Debris boulders | https://polyhaven.com/a/rock_face_03 | Poly Haven | CC0 |
-| Studio Small 09 (HDRI) | Image-based lighting and the blurred backdrop | https://polyhaven.com/a/studio_small_09 | Sergej Majboroda (Poly Haven) | CC0 |
+| Painted Metal 004 | Postal-red enamel: depot drum, dock awning | [Source](https://ambientcg.com/view?id=PaintedMetal004) | ambientCG | CC0 |
+| Painted Metal 012 | Cream and teal enamel: café hut, dock pad | [Source](https://ambientcg.com/view?id=PaintedMetal012) | ambientCG | CC0 |
+| Metal 027 | Powder-coated steel: cannon barrel, stand feet, crate | [Source](https://ambientcg.com/view?id=Metal027) | ambientCG | CC0 |
+| Cardboard 001 | The battered parcel | [Source](https://ambientcg.com/view?id=Cardboard001) | ambientCG | CC0 |
+| Kitchen Wood | Chart-table frame | [Source](https://polyhaven.com/a/kitchen_wood) | Poly Haven | CC0 |
+| Rough Linen | Weave of the star-chart sheet | [Source](https://polyhaven.com/a/rough_linen) | Poly Haven | CC0 |
+| Rock Face 03 | Debris boulders | [Source](https://polyhaven.com/a/rock_face_03) | Poly Haven | CC0 |
+| Studio Small 09 (HDRI) | Image-based lighting and the blurred backdrop | [Source](https://polyhaven.com/a/studio_small_09) | Sergej Majboroda (Poly Haven) | CC0 |
 
 The Poly Haven wood, linen and rock sets were copied from ODD TIDE, another project in the collection, with their records carried over. All textures ship as 1K (rock 512 px) WebP, with roughness and metalness packed into one map.
 
 ### Audio
 
-All audio is in `public/audio/`, re-encoded to MP3 (about 2.5 MB in total). Every file is CC0 (public domain dedication: https://creativecommons.org/publicdomain/zero/1.0/), so attribution is not required but is given here.
+All audio is in `public/audio/`, re-encoded to MP3 (about 2.5 MB in total). Every file is CC0 (public domain dedication: [CC0 licence](https://creativecommons.org/publicdomain/zero/1.0/)), so attribution is not required but is given here.
 
 | File(s) | Source | Author | Licence |
 | --- | --- | --- | --- |
-| `music-hold.mp3` ("Elevator Music") | https://opengameart.org/content/elevator-music | Pro Sensory | CC0 |
-| `ambience-space.mp3` ("Observing The Star", from "Another space background track") | https://opengameart.org/content/another-space-background-track | yd | CC0 |
-| `launch-whoosh`, `flight-hum`, `crashed` | Sci-fi Sounds, https://kenney.nl/assets/sci-fi-sounds | Kenney | CC0 |
-| `launch-clunk`, `bounce`, `stamp`, `rejected` | Impact Sounds, https://kenney.nl/assets/impact-sounds | Kenney | CC0 |
-| `ui-click`, `ui-tick`, `ui-open`, `ui-close`, `ui-toggle`, `ui-retry`, `ui-next`, `circled` | Interface Sounds, https://kenney.nl/assets/interface-sounds | Kenney | CC0 |
-| `brake`, `lost` | Digital Audio, https://kenney.nl/assets/digital-audio | Kenney | CC0 |
-| `delivered`, `ending` | Music Jingles, https://kenney.nl/assets/music-jingles | Kenney | CC0 |
+| `music-hold.mp3` ("Elevator Music") | [Source](https://opengameart.org/content/elevator-music) | Pro Sensory | CC0 |
+| `ambience-space.mp3` ("Observing The Star", from "Another space background track") | [Source](https://opengameart.org/content/another-space-background-track) | yd | CC0 |
+| `launch-whoosh`, `flight-hum`, `crashed` | Sci-fi Sounds, [Source](https://kenney.nl/assets/sci-fi-sounds) | Kenney | CC0 |
+| `launch-clunk`, `bounce`, `stamp`, `rejected` | Impact Sounds, [Source](https://kenney.nl/assets/impact-sounds) | Kenney | CC0 |
+| `ui-click`, `ui-tick`, `ui-open`, `ui-close`, `ui-toggle`, `ui-retry`, `ui-next`, `circled` | Interface Sounds, [Source](https://kenney.nl/assets/interface-sounds) | Kenney | CC0 |
+| `brake`, `lost` | Digital Audio, [Source](https://kenney.nl/assets/digital-audio) | Kenney | CC0 |
+| `delivered`, `ending` | Music Jingles, [Source](https://kenney.nl/assets/music-jingles) | Kenney | CC0 |
 
 The original file names are `ElevatorMusic.wav`, `ObservingTheStar.ogg`, `thrusterFire_000`, `spaceEngineLow_000`, `explosionCrunch_000`, `impactMetal_heavy_000`, `impactPlate_medium_000`, `impactWood_heavy_001`, `impactGlass_heavy_002`, `click_002`, `tick_002`, `open_001`, `close_001`, `switch_002`, `back_001`, `confirmation_001`, `question_001`, `phaserDown2`, `lowDown`, `jingles_STEEL00` and `jingles_SAX03`. Kenney's licence text is CC0 in each pack's `License.txt`. The OpenGameArt licences were read from each page's licence field.
 
 ---
 
-<p align="center"><sub>Part of William King's portfolio collection.</sub></p>
+Part of [William King's portfolio collection](https://github.com/WilliamHenryKing).

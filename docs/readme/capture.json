@@ -1,0 +1,38 @@
+{
+  "slug": "04-per-my-last-transmission",
+  "sourceCommit": "49d3b5e8f18f7012b12d9fad736497a00657ecd3",
+  "url": "https://04-per-my-last-transmission.williamking.workers.dev",
+  "capturedAt": "2026-10-01T06:13:13.311Z",
+  "gpu": "ANGLE (NVIDIA, NVIDIA GeForce RTX 2060 (0x00001F15) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+  "errors": [],
+  "desktop": {
+    "width": 1440,
+    "height": 900
+  },
+  "phone": {
+    "width": 390,
+    "height": 844
+  },
+  "frames": 48,
+  "browser": "154.0.8037.58",
+  "assets": [
+    "/assets/index-C6sa6qpw.js"
+  ],
+  "matchesLocalBuild": true,
+  "phoneOverflow": false,
+  "gifBytes": 1627621,
+  "description": "Current orbital-table opening, camera glide and action-led delivery guide",
+  "phoneIsEmulated": true,
+  "loop": {
+    "frames": 48,
+    "delayCentiseconds": 16,
+    "width": 720,
+    "disposal": "None"
+  },
+  "media": [
+    "preview.gif",
+    "desktop.jpg",
+    "detail.jpg",
+    "phone.jpg"
+  ]
+}
